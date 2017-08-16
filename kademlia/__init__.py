@@ -133,3 +133,27 @@ class KademliaNode(DatagramRPCProtocol):
         if key in self.storage:
             return (self.identifier, ('found', self.storage[key]))
         return (self.identifier, ('notfound', self.routing_table.find_closest_peers(key, excluding=peer_identifier)))
+
+    @asyncio.coroutine
+    def put(self, raw_key, value):
+        hashed_key = get_identifier(raw_key)
+        peers = yield from self.lookup_node(hashed_key, find_value=False)
+
+        store_tasks = [
+            self.store(peer, self.identifier, hashed_key, value) for _, peer in peers
+        ]
+
+        results = yield from asyncio.gather(*store_tasks, return_exceptions=True)
+        successful = [r for r in results if r is True]
+
+        return len(successful)
+
+    @asyncio.coroutine
+    def get(self, raw_key):
+        hashed_key = get_identifier(raw_key)
+
+        if hashed_key in self.storage:
+            return self.storage[hashed_key]
+
+        answer = yield from self.lookup_node(hashed_key, find_value=True)
+        return answer
