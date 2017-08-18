@@ -157,3 +157,54 @@ class KademliaNode(DatagramRPCProtocol):
 
         answer = yield from self.lookup_node(hashed_key, find_value=True)
         return answer
+
+
+    @asyncio.coroutine
+    def lookup_node(self, hashed_key, find_value=False):
+        distance = lambda peer: peer[0] ^ hashed_key
+
+        contacted, dead = set(), set()
+
+        peers = {
+            (peer_identifier, peer)
+            for peer_identifier, peer in
+            self.routing_table.find_closest_peers(hashed_key)
+        }
+
+        if not peers:
+            raise KeyError(hashed_key, 'No peers available.')
+
+        while True:
+            uncontacted = peers - contacted
+
+            if not uncontacted:
+                break
+
+            closest = sorted(uncontacted, key=distance)[:self.alpha]
+
+            for peer_identifier, peer in closest:
+
+                contacted.add((peer_identifier, peer))
+
+                try:
+                    if find_value:
+                        result, contacts = yield from self.find_value(peer, self.identifier, hashed_key)
+                        if result == 'found':
+                            return contacts
+                    else:
+                        contacts = yield from self.find_node(peer, self.identifier, hashed_key)
+
+                except socket.timeout:
+                    self.routing_table.forget_peer(peer_identifier)
+                    dead.add((peer_identifier, peer))
+                    continue
+
+                for new_peer_identifier, new_peer in contacts:
+                    if new_peer_identifier == self.identifier:
+                        continue
+                    peers.add((new_peer_identifier, new_peer))
+
+        if find_value:
+            raise KeyError(hashed_key, 'Not found among any available peers.')
+        else:
+            return sorted(peers - dead, key=distance)[:self.k]
