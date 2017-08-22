@@ -40,10 +40,13 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
 
         super(DatagramRPCProtocol, self).__init__()
 
+    # TODO: Hardcode the reply_functions dict?
     def find_reply_functions(self):
-        return {func.remote_name: func.reply_function
-                for func in self.__class__.__dict__.values()
-                if hasattr(func, 'remote_name')}
+        return {
+            func.remote_name: func.reply_function
+            for func in self.__class__.__dict__.values()
+            if hasattr(func, 'remote_name')
+        }
 
     def connection_made(self, transport):
         logger.info('connection_made: %r', transport)
@@ -53,7 +56,9 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
     def datagram_received(self, data, peer):
         logger.info('data_received: %r, %r', peer, data)
 
+        print(pickle.loads(data))
         direction, message_identifier, *details = pickle.loads(data)
+        print(details)
 
         if direction == 'request':
             procedure_name, args, kwargs = details
