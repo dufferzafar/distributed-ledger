@@ -8,13 +8,18 @@ A dummy bitcoin simulation.
 * kademlia
     - Change model to node per process
 
-    - Use json instead of pickle
-        + Or try using pickle.dump proto=2
-
     - Identifiers:
         + HASH160 for Node ID
         + SHA1 for Key
         + Randbits for Msg ID
+
+* Use hexadecimal/base64 node ids
+    - Separate message identifier class that is an int
+    - But gets printed as base 64?
+
+* Break datagramrpc into a separate file and implement non-kademlia functions there?
+
+* On stopping the mininet-network kill all xterms
 
 <!-- 
 
@@ -25,4 +30,4 @@ A dummy bitcoin simulation.
     - So there should be a way to enforce that no insert/delete/extend calls will work.
     - The rest of the list interface should stay intact
 
- -->
+-->
