@@ -26,10 +26,14 @@ def setup_logging(node_id):
     kademlia_logger.addHandler(stream_handler)
 
 
-def start_a_node(sock_addr, bootstrap_addr=None):
+@asyncio.coroutine
+def continuous_ping(node, to, interval=5):
+    while True:
+        yield from asyncio.sleep(interval)
+        yield from node.ping(to, node.identifier)
 
-    # DEBUG:
-    print(sock_addr[0], sock_addr[1])
+
+def start_a_node(sock_addr, bootstrap_addr=None):
 
     loop = asyncio.get_event_loop()
 
@@ -39,15 +43,9 @@ def start_a_node(sock_addr, bootstrap_addr=None):
     # Setup logging once we have the ID
     setup_logging(node.identifier)
 
-    print(node.identifier)
-
-    # TODO: Will this work? Test!
     if bootstrap_addr:
-
-        try:
-            loop.run_until_complete(node.ping(bootstrap_addr, node.identifier))
-        except:
-            print("ping to bootrap node failed.")
+        # loop.run_until_complete(node.ping(bootstrap_addr, node.identifier))
+        loop.create_task(continuous_ping(node, bootstrap_addr, interval=3))
 
     loop.run_forever()
 
