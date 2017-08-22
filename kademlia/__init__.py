@@ -5,11 +5,12 @@ import socket
 from functools import wraps
 
 from .routing_table import RoutingTable
+from .utils import sha1_int, random_id
 
 
 def remote(func):
 
-    @asyncio.coroutine()
+    @asyncio.coroutine
     @wraps(func)
     def inner(*args, **kwargs):
         instance, peer, *args = args
@@ -20,6 +21,7 @@ def remote(func):
     inner.reply_function = func
 
     return inner
+
 
 class DatagramRPCProtocol(asyncio.DatagramProtocol):
 
@@ -66,7 +68,7 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
             reply.set_exception(socket.timeout)
 
     def request(self, peer, procedure_name, *args, **kwargs):
-        message_identifier = get_random_identifier()
+        message_identifier = random_id()
 
         reply = asyncio.Future()
         self.outstanding_requests[message_identifier] = reply
@@ -92,8 +94,9 @@ class KademliaNode(DatagramRPCProtocol):
 
     def __init__(self, alpha=3, k=20, identifier=None):
 
+        # Use HASH160
         if identifier is None:
-            identifier = get_random_identifier()
+            identifier = random_id()
 
         self.identifier = identifier
         self.routing_table = RoutingTable(self.identifier, k=k)
@@ -136,7 +139,7 @@ class KademliaNode(DatagramRPCProtocol):
 
     @asyncio.coroutine
     def put(self, raw_key, value):
-        hashed_key = get_identifier(raw_key)
+        hashed_key = sha1_int(raw_key)
         peers = yield from self.lookup_node(hashed_key, find_value=False)
 
         store_tasks = [
@@ -150,7 +153,7 @@ class KademliaNode(DatagramRPCProtocol):
 
     @asyncio.coroutine
     def get(self, raw_key):
-        hashed_key = get_identifier(raw_key)
+        hashed_key = sha1_int(raw_key)
 
         if hashed_key in self.storage:
             return self.storage[hashed_key]
