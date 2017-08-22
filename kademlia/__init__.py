@@ -92,7 +92,7 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
         loop.call_later(self.reply_timeout, self.reply_timed_out, message_identifier)
 
         obj = ('request', message_identifier, procedure_name, args, kwargs)
-        message = pickle.dumps(obj)
+        message = pickle.dumps(obj, protocol=0)
 
         self.transport.sendto(message, peer)
 
@@ -100,7 +100,7 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
 
     def reply(self, peer, message_identifier, answer):
         obj = ('reply', message_identifier, answer)
-        message = pickle.dumps(obj)
+        message = pickle.dumps(obj, protocol=0)
 
         self.transport.sendto(message, peer)
 
