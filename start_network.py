@@ -7,7 +7,6 @@ import config
 from mininet.net import Mininet
 
 BOOT_PORT = 9000
-LOCALHOST = "127.0.0.1"
 MAX_NODES = 3
 
 
@@ -33,7 +32,7 @@ def main():
 
     # first node without bootstrap
     hosts[0].cmd(
-        'xterm -hold -geometry 130x40+0+900 -e python3 start_node.py %s %d &' % (LOCALHOST, BOOT_PORT)
+        'xterm -hold -geometry 130x40+0+900 -e python3 start_node.py %s %d &' % (hosts[0].IP(), BOOT_PORT)
     )
 
     boot_ip = hosts[0].IP()
@@ -42,7 +41,7 @@ def main():
     port = BOOT_PORT+1
     for host in hosts[1:]:
         host.cmd('xterm -hold -geometry 130x40+0+900 -e python3 -u start_node.py %s %d %s %d &' %
-                 (LOCALHOST, port, boot_ip, BOOT_PORT))
+                 (host.IP(), port, boot_ip, BOOT_PORT))
         port += 1
 
     raw_input('Press enter to stop all nodes.')
