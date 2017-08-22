@@ -63,7 +63,7 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
             self.request_received(peer, message_identifier, procedure_name, args, kwargs)
 
         elif direction == 'reply':
-            answer, = details
+            answer = details[0]
             self.reply_received(peer, message_identifier, answer)
 
     def request_received(self, peer, message_identifier, procedure_name, args, kwargs):
