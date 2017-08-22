@@ -21,7 +21,10 @@ def remote(func):
         answer = yield from instance.request(peer, inner.remote_name, *args, **kwargs)
         return answer
 
+    # String: name of function
     inner.remote_name = func.__name__
+
+    # Callable: function object
     inner.reply_function = func
 
     return inner
@@ -61,7 +64,7 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
             self.reply_received(peer, message_identifier, answer)
 
     def request_received(self, peer, message_identifier, procedure_name, args, kwargs):
-        logger.info('request from %r: %r(*%r, **%r) as message %r',
+        logger.info('received request from %r: %r(*%r, **%r) as message %r',
                     peer, procedure_name, args, kwargs, message_identifier)
 
         reply_function = self.reply_functions[procedure_name]
@@ -69,7 +72,7 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
         self.reply(peer, message_identifier, answer)
 
     def reply_received(self, peer, message_identifier, answer):
-        logger.info('reply to message %r, answer %r', message_identifier, answer)
+        logger.info('received reply to message %r, answer %r', message_identifier, answer)
 
         if message_identifier in self.outstanding_requests:
             reply = self.outstanding_requests.pop(message_identifier)
@@ -81,9 +84,10 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
             reply.set_exception(socket.timeout)
 
     def request(self, peer, procedure_name, *args, **kwargs):
-        logger.info("sending request(%r, %r)", peer, procedure_name)
-
         message_identifier = random_id()
+
+        logger.info("sending request to %r: %r(*%r, **%r) as message %r",
+                    peer, procedure_name, args, kwargs, message_identifier)
 
         reply = asyncio.Future()
         self.outstanding_requests[message_identifier] = reply
@@ -99,7 +103,8 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
         return reply
 
     def reply(self, peer, message_identifier, answer):
-        logger.info("sending reply(%r, %r, %r)", peer, message_identifier, answer)
+        logger.info("sending reply to %r: (%r, %r)",
+                    peer, message_identifier, answer)
 
         obj = ('reply', message_identifier, answer)
         message = pickle.dumps(obj, protocol=0)
@@ -137,26 +142,26 @@ class KademliaNode(DatagramRPCProtocol):
 
     @remote
     def ping(self, peer, peer_identifier):
-        logger.info('ping(%r, %r)', peer, peer_identifier)
+        logger.info('handling ping(%r, %r)', peer, peer_identifier)
 
         return (self.identifier, self.identifier)
 
     @remote
     def store(self, peer, peer_identifier, key, value):
-        logger.info('store(%r, %r, %r, %r)', peer, peer_identifier, key, value)
+        logger.info('handling store(%r, %r, %r, %r)', peer, peer_identifier, key, value)
 
         self.storage[key] = value
         return (self.identifier, True)
 
     @remote
     def find_node(self, peer, peer_identifier, key):
-        logger.info('find_node(%r, %r, %r)', peer, peer_identifier, key)
+        logger.info('handling find_node(%r, %r, %r)', peer, peer_identifier, key)
 
         return (self.identifier, self.routing_table.find_closest_peers(key, excluding=peer_identifier))
 
     @remote
     def find_value(self, peer, peer_identifier, key):
-        logger.info('find_value(%r, %r, %r)', peer, peer_identifier, key)
+        logger.info('handling find_value(%r, %r, %r)', peer, peer_identifier, key)
 
         if key in self.storage:
             return (self.identifier, ('found', self.storage[key]))
@@ -185,7 +190,6 @@ class KademliaNode(DatagramRPCProtocol):
 
         answer = yield from self.lookup_node(hashed_key, find_value=True)
         return answer
-
 
     @asyncio.coroutine
     def lookup_node(self, hashed_key, find_value=False):
