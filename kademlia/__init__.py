@@ -1,11 +1,15 @@
 import asyncio
 import pickle
+import logging
 import socket
 
 from functools import wraps
 
 from .routing_table import RoutingTable
 from .utils import sha1_int, random_id
+
+
+logger = logging.getLogger(__name__)
 
 
 def remote(func):
@@ -39,9 +43,13 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
                 if hasattr(func, 'remote_name')}
 
     def connection_made(self, transport):
+        logger.info('connection_made: %r', transport)
+
         self.transport = transport
 
     def datagram_received(self, data, peer):
+        logger.info('data_received: %r, %r', peer, data)
+
         direction, message_identifier, *details = pickle.loads(data)
 
         if direction == 'request':
@@ -53,11 +61,16 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
             self.reply_received(peer, message_identifier, answer)
 
     def request_received(self, peer, message_identifier, procedure_name, args, kwargs):
+        logger.info('request from %r: %r(*%r, **%r) as message %r',
+                    peer, procedure_name, args, kwargs, message_identifier)
+
         reply_function = self.reply_functions[procedure_name]
         answer = reply_function(self, peer, *args, **kwargs)
         self.reply(peer, message_identifier, answer)
 
     def reply_received(self, peer, message_identifier, answer):
+        logger.info('reply to message %r, answer %r', message_identifier, answer)
+
         if message_identifier in self.outstanding_requests:
             reply = self.outstanding_requests.pop(message_identifier)
             reply.set_result(answer)
@@ -69,6 +82,8 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
 
     def request(self, peer, procedure_name, *args, **kwargs):
         message_identifier = random_id()
+
+        logger.info("request(%r, %r", peer, procedure_name)
 
         reply = asyncio.Future()
         self.outstanding_requests[message_identifier] = reply
@@ -120,19 +135,27 @@ class KademliaNode(DatagramRPCProtocol):
 
     @remote
     def ping(self, peer, peer_identifier):
+        logger.info('ping(%r, %r)', peer, peer_identifier)
+
         return (self.identifier, self.identifier)
 
     @remote
     def store(self, peer, peer_identifier, key, value):
+        logger.info('store(%r, %r, %r, %r)', peer, peer_identifier, key, value)
+
         self.storage[key] = value
         return (self.identifier, True)
 
     @remote
     def find_node(self, peer, peer_identifier, key):
+        logger.info('find_node(%r, %r, %r)', peer, peer_identifier, key)
+
         return (self.identifier, self.routing_table.find_closest_peers(key, excluding=peer_identifier))
 
     @remote
     def find_value(self, peer, peer_identifier, key):
+        logger.info('find_value(%r, %r, %r)', peer, peer_identifier, key)
+
         if key in self.storage:
             return (self.identifier, ('found', self.storage[key]))
         return (self.identifier, ('notfound', self.routing_table.find_closest_peers(key, excluding=peer_identifier)))
