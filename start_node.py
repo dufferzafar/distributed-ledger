@@ -20,7 +20,7 @@ def setup_logging(node_id):
     # stream_handler = logging.FileHandler('logs/%d.log' % node_id, "w")
     stream_handler.setLevel(logging.DEBUG)
 
-    format_ = logging.Formatter('%(asctime)s - %(message)s')
+    format_ = logging.Formatter('\n%(asctime)s - %(message)s\n')
     stream_handler.setFormatter(format_)
 
     kademlia_logger.addHandler(stream_handler)
@@ -43,7 +43,11 @@ def start_a_node(sock_addr, bootstrap_addr=None):
 
     # TODO: Will this work? Test!
     if bootstrap_addr:
-        loop.run_until_complete(node.ping(bootstrap_addr, node.identifier))
+
+        try:
+            loop.run_until_complete(node.ping(bootstrap_addr, node.identifier))
+        except:
+            print("ping to bootrap node failed.")
 
     loop.run_forever()
 
