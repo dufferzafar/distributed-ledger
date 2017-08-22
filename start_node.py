@@ -7,6 +7,7 @@ import config
 
 from kademlia import KademliaNode
 
+
 def setup_logging(node_id):
 
     if not os.path.exists(config.LOG_DIR):
@@ -19,7 +20,7 @@ def setup_logging(node_id):
     # stream_handler = logging.FileHandler('logs/%d.log' % node_id, "w")
     stream_handler.setLevel(logging.DEBUG)
 
-    format_ = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    format_ = logging.Formatter('%(asctime)s - %(message)s')
     stream_handler.setFormatter(format_)
 
     kademlia_logger.addHandler(stream_handler)

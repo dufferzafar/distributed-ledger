@@ -81,9 +81,9 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
             reply.set_exception(socket.timeout)
 
     def request(self, peer, procedure_name, *args, **kwargs):
-        message_identifier = random_id()
+        logger.info("sending request(%r, %r)", peer, procedure_name)
 
-        logger.info("request(%r, %r", peer, procedure_name)
+        message_identifier = random_id()
 
         reply = asyncio.Future()
         self.outstanding_requests[message_identifier] = reply
@@ -92,15 +92,17 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
         loop.call_later(self.reply_timeout, self.reply_timed_out, message_identifier)
 
         obj = ('request', message_identifier, procedure_name, args, kwargs)
-        message = pickle.dumps(obj)
+        message = pickle.dumps(obj, protocol=0)
 
         self.transport.sendto(message, peer)
 
         return reply
 
     def reply(self, peer, message_identifier, answer):
+        logger.info("sending reply(%r, %r, %r)", peer, message_identifier, answer)
+
         obj = ('reply', message_identifier, answer)
-        message = pickle.dumps(obj)
+        message = pickle.dumps(obj, protocol=0)
 
         self.transport.sendto(message, peer)
 
