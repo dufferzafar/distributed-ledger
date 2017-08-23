@@ -40,8 +40,8 @@ def log_routing_table(node,interval=5):
 
         table = node.routing_table.get_routing_table()
         for dic in table:
-            if len(dic)!=0:
-                info = info+(str(dic))+"\n"
+            for key,value in dic.items():
+                info = info+(str(key)+" : "+str(value))+"\n"
                 
         logger.info(info)
         yield from asyncio.sleep(interval)
