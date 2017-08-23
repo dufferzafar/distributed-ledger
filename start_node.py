@@ -7,7 +7,6 @@ import config
 
 from kademlia import KademliaNode
 
-
 def setup_logging(node_id):
 
     if not os.path.exists(config.LOG_DIR):
@@ -33,6 +32,20 @@ def continuous_ping(node, to, interval=5):
         yield from node.ping(to, node.identifier)
 
 
+@asyncio.coroutine
+def log_routing_table(node,interval=5):
+    while True:
+        logger = logging.getLogger('kademlia')
+        info = "Routing Table\n"
+
+        table = node.routing_table.get_routing_table()
+        for dic in table:
+            if len(dic)!=0:
+                info = info+(str(dic))+"\n"
+                
+        logger.info(info)
+        yield from asyncio.sleep(interval)
+
 def start_a_node(sock_addr, bootstrap_addr=None):
 
     loop = asyncio.get_event_loop()
@@ -46,9 +59,13 @@ def start_a_node(sock_addr, bootstrap_addr=None):
     logging.getLogger('kademlia').info('MyId: %s',node.identifier)
     
     if bootstrap_addr:
-        # loop.run_until_complete(node.ping(bootstrap_addr, node.identifier))
-        loop.create_task(continuous_ping(node, bootstrap_addr, interval=3))
+        loop.run_until_complete(node.ping(bootstrap_addr, node.identifier))
+        loop.run_until_complete(node.join())
+        loop.create_task(log_routing_table(node,interval=2)) # log the routing table every two second
+        
+        # loop.create_task(continuous_ping(node, bootstrap_addr, interval=3))
 
+    
     loop.run_forever()
 
 

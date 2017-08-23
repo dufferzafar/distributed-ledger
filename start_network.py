@@ -33,7 +33,7 @@ def main():
 
     # first node without bootstrap
     hosts[0].cmd(
-        'xterm -hold -geometry 130x40+0+900 -title "host_0 %s %d" -e python3 start_node.py %s %d &' % (hosts[0].IP(), BOOT_PORT, hosts[0].IP(), BOOT_PORT)
+        'xterm -hold -geometry 130x40+0+900 -title "bootstrap %s %d" -e python3 start_node.py %s %d &' % (hosts[0].IP(), BOOT_PORT, hosts[0].IP(), BOOT_PORT)
     )
 
     boot_ip = hosts[0].IP()
