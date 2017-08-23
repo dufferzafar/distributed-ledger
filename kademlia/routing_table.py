@@ -14,6 +14,14 @@ class RoutingTable(object):
 
         super(RoutingTable, self).__init__()
 
+    def __str__(self):
+        dump = ""
+        for bucket in self.buckets:
+            for k, v in bucket.items():
+                dump += "%d : %r\n" % (k, v)
+
+        return dump
+
     def distance(self, peer_identifier):
         return self.node_identifier ^ peer_identifier
 
@@ -89,6 +97,3 @@ class RoutingTable(object):
                     if len(peers) == k:
                         return peers
         return peers
-
-    def get_routing_table(self):
-        return self.buckets
