@@ -9,13 +9,12 @@ class RoutingTable(object):
 
         self.node_identifier = node_identifier
         self.k = k
-        self.buckets = [OrderedDict() for _ in range(160)]
-        self.replacement_caches = [OrderedDict() for _ in range(160)]
+        self.buckets = [OrderedDict() for _ in range(161)] #
+        self.replacement_caches = [OrderedDict() for _ in range(161)] #
 
         super(RoutingTable, self).__init__()
 
     def distance(self, peer_identifier):
-
         return self.node_identifier ^ peer_identifier
 
     def bucket_index(self, peer_identifier):
@@ -90,3 +89,6 @@ class RoutingTable(object):
                     if len(peers) == k:
                         return peers
         return peers
+
+    def get_routing_table(self):
+        return self.buckets
