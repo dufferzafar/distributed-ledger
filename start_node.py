@@ -43,6 +43,8 @@ def start_a_node(sock_addr, bootstrap_addr=None):
     # Setup logging once we have the ID
     setup_logging(node.identifier)
 
+    logging.getLogger('kademlia').info('MyId: %s',node.identifier)
+    
     if bootstrap_addr:
         # loop.run_until_complete(node.ping(bootstrap_addr, node.identifier))
         loop.create_task(continuous_ping(node, bootstrap_addr, interval=3))
