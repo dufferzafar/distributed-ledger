@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import os
-
+import time
 import config
 
 from mininet.clean import cleanup
@@ -43,11 +43,17 @@ def main():
     for i,host in enumerate(hosts[1:]):
         host.cmd('xterm -hold -geometry 130x40+0+900 -title "host_%d %s %d" -e python3 -u start_node.py %s %d %s %d &' %
                  (i+1, host.IP(), port, host.IP(), port, boot_ip, BOOT_PORT))
+        time.sleep(1) #delay to ensure each node is spawned at a slightly different timed so that no two nodes fight for single actual port (127.0.0.1:port)
+                      #every node 10.0.0.*:port is mapped to some 127.0.0.1:port
         port += 1
 
     raw_input('Press enter to stop all nodes.')
+    print ("Killing all nodes\n")
+    os.system("killall -SIGINT python3") #to kill all start_node inside every terminal
+    print ("Killing all xterms\n")
+    os.system("killall -SIGINT xterm") #to kill all xterms
     net.stop()
     cleanup()
-
+    
 if __name__ == '__main__':
     main()
