@@ -157,3 +157,7 @@ class KademliaNode(DatagramRPCProtocol):
             raise KeyError(hashed_key, 'Not found among any available peers.')
         else:
             return sorted(peers - dead, key=distance)[:self.k]
+
+    @asyncio.coroutine
+    def join(self):
+        yield from self.lookup_node(self.identifier)

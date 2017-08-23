@@ -4,6 +4,7 @@ import os
 
 import config
 
+from mininet.clean import cleanup
 from mininet.net import Mininet
 
 BOOT_PORT = 9000
@@ -32,7 +33,7 @@ def main():
 
     # first node without bootstrap
     hosts[0].cmd(
-        'xterm -hold -geometry 130x40+0+900 -title "host_0 %s %d" -e python3 start_node.py %s %d &' % (hosts[0].IP(), BOOT_PORT,hosts[0].IP(), BOOT_PORT)
+        'xterm -hold -geometry 130x40+0+900 -title "host_0 %s %d" -e python3 start_node.py %s %d &' % (hosts[0].IP(), BOOT_PORT, hosts[0].IP(), BOOT_PORT)
     )
 
     boot_ip = hosts[0].IP()
@@ -41,11 +42,12 @@ def main():
     port = BOOT_PORT+1
     for i,host in enumerate(hosts[1:]):
         host.cmd('xterm -hold -geometry 130x40+0+900 -title "host_%d %s %d" -e python3 -u start_node.py %s %d %s %d &' %
-                 (i+1,host.IP(), port,host.IP(), port, boot_ip, BOOT_PORT))
+                 (i+1, host.IP(), port, host.IP(), port, boot_ip, BOOT_PORT))
         port += 1
 
     raw_input('Press enter to stop all nodes.')
     net.stop()
+    cleanup()
 
 if __name__ == '__main__':
     main()
