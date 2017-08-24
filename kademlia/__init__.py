@@ -159,5 +159,11 @@ class KademliaNode(DatagramRPCProtocol):
             return sorted(peers - dead, key=distance)[:self.k]
 
     @asyncio.coroutine
+    def ping_all_neighbors(self):
+        for node_id, peer in self.routing_table:
+            yield from self.ping(peer, self.identifier)
+
+    @asyncio.coroutine
     def join(self):
         yield from self.lookup_node(self.identifier)
+        yield from self.ping_all_neighbors()

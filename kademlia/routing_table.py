@@ -22,6 +22,11 @@ class RoutingTable(object):
 
         return dump
 
+    def __iter__(self):
+        for bucket in self.buckets:
+            for peer in bucket.items():
+                yield peer
+
     def distance(self, peer_identifier):
         return self.node_identifier ^ peer_identifier
 
