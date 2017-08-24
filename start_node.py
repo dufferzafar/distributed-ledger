@@ -41,6 +41,14 @@ def log_routing_table(node, interval=5):
         yield from asyncio.sleep(interval)
 
 
+@asyncio.coroutine
+def log_dht(node, interval=5):
+    while True:
+        logger = logging.getLogger('kademlia')
+        logger.info("DHT\n" + str(node))
+        yield from asyncio.sleep(interval)
+
+
 def start_a_node(sock_addr, bootstrap_addr=None):
 
     loop = asyncio.get_event_loop()
@@ -64,6 +72,7 @@ def start_a_node(sock_addr, bootstrap_addr=None):
 
     # Log the routing table every two second
     loop.create_task(log_routing_table(node, interval=2))
+    loop.create_task(log_dht(node, interval=2))
 
     loop.run_forever()
 
