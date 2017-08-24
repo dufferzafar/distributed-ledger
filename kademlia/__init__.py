@@ -1,5 +1,4 @@
 import asyncio
-import pickle
 import logging
 import socket
 
@@ -91,10 +90,11 @@ class KademliaNode(DatagramRPCProtocol):
     @asyncio.coroutine
     def put(self, raw_key, value):
         hashed_key = sha1_int(raw_key)
-        peers = yield from self.lookup_node(hashed_key, find_value=False)
+        peers_close_to_key = yield from self.lookup_node(hashed_key, find_value=False)
 
         store_tasks = [
-            self.store(peer, self.identifier, hashed_key, value) for _, peer in peers
+            self.store(peer, self.identifier, hashed_key, value)
+            for _, peer in peers_close_to_key
         ]
 
         results = yield from asyncio.gather(*store_tasks, return_exceptions=True)
