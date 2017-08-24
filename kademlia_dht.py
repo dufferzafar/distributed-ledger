@@ -89,7 +89,9 @@ class KademliaNode(DatagramRPCProtocol):
 
     @asyncio.coroutine
     def put(self, raw_key, value):
-        hashed_key = sha1_int(raw_key)
+        # hashed_key = sha1_int(raw_key) # key is node_id which is already hashed to 160bit
+        # why do we need to hash again?
+        hashed_key = raw_key; # dht key is node_id already hashed
         peers_close_to_key = yield from self.lookup_node(hashed_key, find_value=False)
 
         store_tasks = [
@@ -104,12 +106,16 @@ class KademliaNode(DatagramRPCProtocol):
 
     @asyncio.coroutine
     def get(self, raw_key):
-        hashed_key = sha1_int(raw_key)
-
+        # hashed_key = sha1_int(raw_key) # key is node_id which is already hashed to 160bit
+        # why do we need to hash again?
+        hashed_key = raw_key
         if hashed_key in self.storage:
             return self.storage[hashed_key]
+        try:
+            answer = yield from self.lookup_node(hashed_key, find_value=True)
+        except KeyError as e:
+            raise e
 
-        answer = yield from self.lookup_node(hashed_key, find_value=True)
         return answer
 
     @asyncio.coroutine
