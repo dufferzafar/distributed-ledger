@@ -164,7 +164,7 @@ class KademliaNode(DatagramRPCProtocol):
 
     @asyncio.coroutine
     def ping_all_neighbors(self):
-        for node_id, peer in self.routing_table:
+        for node_id, peer in list(self.routing_table):
             yield from self.ping(peer, self.identifier)
 
     @asyncio.coroutine
