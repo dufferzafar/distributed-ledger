@@ -4,9 +4,9 @@ import socket
 
 from functools import wraps
 
-from .routing_table import RoutingTable
-from .utils import sha1_int, random_id
-from .datagram_rpc import DatagramRPCProtocol
+from routing_table import RoutingTable
+from utils import sha1_int, random_id, gen_pub_pvt
+from datagram_rpc import DatagramRPCProtocol
 
 logger = logging.getLogger(__name__)
 

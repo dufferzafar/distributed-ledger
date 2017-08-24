@@ -3,7 +3,7 @@ import pickle
 import logging
 import socket
 
-from .utils import sha1_int, random_id 
+from utils import sha1_int, random_id 
 logger = logging.getLogger(__name__)
 
 class DatagramRPCProtocol(asyncio.DatagramProtocol):
