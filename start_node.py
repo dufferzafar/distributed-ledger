@@ -54,12 +54,16 @@ def start_a_node(sock_addr, bootstrap_addr=None):
 
     logging.getLogger('kademlia').info('MyId: %s', node.identifier)
 
-    if bootstrap_addr:
-        loop.run_until_complete(node.ping(bootstrap_addr, node.identifier))
-        loop.run_until_complete(node.join())
+    # log the routing table every two second
+    loop.create_task(log_routing_table(node, interval=2))
 
-        # log the routing table every two second
-        loop.create_task(log_routing_table(node, interval=2))
+    # For nodes that are not bootstrapper
+    if bootstrap_addr:
+        # When a new node is created, it pings the bootstrapper
+        loop.run_until_complete(node.ping(bootstrap_addr, node.identifier))
+
+        # and then follows kademlia join protocol
+        loop.run_until_complete(node.join())
 
         # loop.create_task(continuous_ping(node, bootstrap_addr, interval=3))
 

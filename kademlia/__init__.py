@@ -169,5 +169,6 @@ class KademliaNode(DatagramRPCProtocol):
 
     @asyncio.coroutine
     def join(self):
+        # http://xlattice.sourceforge.net/components/protocol/kademlia/specs.html#join
         yield from self.lookup_node(self.identifier)
         yield from self.ping_all_neighbors()
