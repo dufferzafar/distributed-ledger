@@ -184,3 +184,14 @@ class KademliaNode(DatagramRPCProtocol):
         # http://xlattice.sourceforge.net/components/protocol/kademlia/specs.html#join
         yield from self.lookup_node(self.identifier)
         yield from self.ping_all_neighbors()
+
+        try:
+            yield from self.get(self.identifier)
+            # search if my public key already in network
+        except KeyError:  # key not found
+            pub_key, pvt_key = gen_pub_pvt()
+            # generate public private key pair
+            self.pvt_key = pvt_key
+            my_sock_addr = self.transport.get_extra_info('sockname')
+            # function to get my own socket
+            yield from self.put(self.identifier, (my_sock_addr, pub_key))
