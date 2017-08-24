@@ -33,27 +33,30 @@ def main():
 
     # first node without bootstrap
     hosts[0].cmd(
-        'xterm -hold -geometry 130x40+0+900 -title "bootstrap %s %d" -e python3 start_node.py %s %d &' % (hosts[0].IP(), BOOT_PORT, hosts[0].IP(), BOOT_PORT)
+        'xterm -hold -geometry 130x40+0+900 -title "bootstrap %s %d" -e python3 start_node.py %s %d &' % (
+            hosts[0].IP(), BOOT_PORT, hosts[0].IP(), BOOT_PORT)
     )
 
     boot_ip = hosts[0].IP()
 
     # rest of the nodes
-    port = BOOT_PORT+1
-    for i,host in enumerate(hosts[1:]):
+    port = BOOT_PORT + 1
+    for i, host in enumerate(hosts[1:]):
         host.cmd('xterm -hold -geometry 130x40+0+900 -title "host_%d %s %d" -e python3 -u start_node.py %s %d %s %d &' %
-                 (i+1, host.IP(), port, host.IP(), port, boot_ip, BOOT_PORT))
-        time.sleep(1) #delay to ensure each node is spawned at a slightly different timed so that no two nodes fight for single actual port (127.0.0.1:port)
-                      #every node 10.0.0.*:port is mapped to some 127.0.0.1:port
+                 (i + 1, host.IP(), port, host.IP(), port, boot_ip, BOOT_PORT))
+        # delay to ensure each node is spawned at a slightly different timed so that no two nodes fight for single actual port (127.0.0.1:port)
+        time.sleep(1)
+        # every node 10.0.0.*:port is mapped to some 127.0.0.1:port
         port += 1
 
     raw_input('Press enter to stop all nodes.')
     print ("Killing all nodes\n")
-    os.system("killall -SIGINT python3") #to kill all start_node inside every terminal
+    # to kill all start_node inside every terminal
+    os.system("killall -SIGINT python3")
     print ("Killing all xterms\n")
-    os.system("killall -SIGINT xterm") #to kill all xterms
+    os.system("killall -SIGINT xterm")  # to kill all xterms
     net.stop()
     cleanup()
-    
+
 if __name__ == '__main__':
     main()

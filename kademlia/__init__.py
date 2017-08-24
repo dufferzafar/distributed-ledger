@@ -29,6 +29,7 @@ def remote(func):
 
     return inner
 
+
 class KademliaNode(DatagramRPCProtocol):
 
     def __init__(self, alpha=3, k=20, identifier=None):
@@ -65,20 +66,23 @@ class KademliaNode(DatagramRPCProtocol):
 
     @remote
     def store(self, peer, peer_identifier, key, value):
-        logger.info('handling store(%r, %r, %r, %r)', peer, peer_identifier, key, value)
+        logger.info('handling store(%r, %r, %r, %r)',
+                    peer, peer_identifier, key, value)
 
         self.storage[key] = value
         return (self.identifier, True)
 
     @remote
     def find_node(self, peer, peer_identifier, key):
-        logger.info('handling find_node(%r, %r, %r)', peer, peer_identifier, key)
+        logger.info('handling find_node(%r, %r, %r)',
+                    peer, peer_identifier, key)
 
         return (self.identifier, self.routing_table.find_closest_peers(key, excluding=peer_identifier))
 
     @remote
     def find_value(self, peer, peer_identifier, key):
-        logger.info('handling find_value(%r, %r, %r)', peer, peer_identifier, key)
+        logger.info('handling find_value(%r, %r, %r)',
+                    peer, peer_identifier, key)
 
         if key in self.storage:
             return (self.identifier, ('found', self.storage[key]))
@@ -110,7 +114,7 @@ class KademliaNode(DatagramRPCProtocol):
 
     @asyncio.coroutine
     def lookup_node(self, hashed_key, find_value=False):
-        distance = lambda peer: peer[0] ^ hashed_key
+        def distance(peer): return peer[0] ^ hashed_key
 
         contacted, dead = set(), set()
 
