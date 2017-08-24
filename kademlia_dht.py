@@ -45,6 +45,12 @@ class KademliaNode(DatagramRPCProtocol):
 
         super(KademliaNode, self).__init__()
 
+    def __str__(self):
+        dht = ""
+        for k, v in self.storage.items():
+            dht += "%d : %r\n" % (k, v)
+        return dht
+
     def request_received(self, peer, message_identifier, procedure_name, args, kwargs):
         peer_identifier = args[0]
         self.routing_table.update_peer(peer_identifier, peer)
