@@ -5,7 +5,7 @@ import sys
 import signal
 import config
 
-from kademlia import KademliaNode
+from kademlia_dht import KademliaNode
 
 
 def setup_logging(node_id):

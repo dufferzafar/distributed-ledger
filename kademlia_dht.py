@@ -6,7 +6,7 @@ from functools import wraps
 
 from .routing_table import RoutingTable
 from .utils import sha1_int, random_id
-from .datagram import DatagramRPCProtocol
+from .datagram_rpc import DatagramRPCProtocol
 
 logger = logging.getLogger(__name__)
 
