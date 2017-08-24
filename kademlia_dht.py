@@ -29,7 +29,7 @@ def remote(func):
     return inner
 
 
-class KademliaNode(DatagramRPCProtocol):
+class Node(DatagramRPCProtocol):
 
     def __init__(self, alpha=3, k=20, identifier=None):
 
@@ -43,7 +43,7 @@ class KademliaNode(DatagramRPCProtocol):
         self.alpha = alpha
         self.storage = {}
 
-        super(KademliaNode, self).__init__()
+        super(Node, self).__init__()
 
     def __str__(self):
         dht = ""
@@ -55,13 +55,13 @@ class KademliaNode(DatagramRPCProtocol):
         peer_identifier = args[0]
         self.routing_table.update_peer(peer_identifier, peer)
 
-        super(KademliaNode, self).request_received(peer, message_identifier, procedure_name, args, kwargs)
+        super(Node, self).request_received(peer, message_identifier, procedure_name, args, kwargs)
 
     def reply_received(self, peer, message_identifier, answer):
         peer_identifier, answer = answer
         self.routing_table.update_peer(peer_identifier, peer)
 
-        super(KademliaNode, self).reply_received(peer, message_identifier, answer)
+        super(Node, self).reply_received(peer, message_identifier, answer)
 
     @remote
     def ping(self, peer, peer_identifier):

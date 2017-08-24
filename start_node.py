@@ -5,7 +5,7 @@ import sys
 import signal
 import config
 
-from kademlia_dht import KademliaNode
+from kademlia_dht import Node
 
 
 def setup_logging(node_id):
@@ -54,7 +54,7 @@ def start_a_node(sock_addr, bootstrap_addr=None):
     loop = asyncio.get_event_loop()
     # on receiving SIGINT Ctrl+C it will try to stop the loop
     loop.add_signal_handler(signal.SIGINT, loop.stop)
-    f = loop.create_datagram_endpoint(KademliaNode, local_addr=sock_addr)
+    f = loop.create_datagram_endpoint(Node, local_addr=sock_addr)
     _, node = loop.run_until_complete(f)
 
     # Setup logging once we have the ID
