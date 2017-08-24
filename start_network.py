@@ -64,6 +64,9 @@ def start_network(nodes=3):
     cleanup()
 
 if __name__ == '__main__':
-    start_network(
-        nodes=int(sys.argv[1])
-    )
+    try:
+        start_network(
+            nodes=int(sys.argv[1])
+        )
+    except KeyboardInterrupt:
+        cleanup()
