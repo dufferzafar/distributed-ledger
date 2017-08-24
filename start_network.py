@@ -46,15 +46,14 @@ def start_network(nodes=3):
     # Other nodes
     port = BOOT_PORT + 1
     for i, host in enumerate(hosts[1:]):
-        host.cmd('xterm -hold -geometry 130x40+0+900 -title "host_%d %s %d" -e python3 -u start_node.py %s %d %s %d &' %
-                 (i + 1, host.IP(), port, host.IP(), port, boot_ip, BOOT_PORT))
-
-        # Ensure that each node is spawned with a slight delay
+        # Ensure that each consecutive node is spawned with a slight delay
         # so that no two nodes fight for single actual port (127.0.0.1:port)
-        time.sleep(1)
-
         # Every node 10.0.0.*:port is mapped to some 127.0.0.1:port
         # by mininet ?
+        time.sleep(1)
+        host.cmd('xterm -hold -geometry 130x40+0+900 -title "host_%d %s %d" -e python3 -u start_node.py %s %d %s %d &' %
+                 (i + 1, host.IP(), port, host.IP(), port, boot_ip, BOOT_PORT))
+        
         port += 1
 
     raw_input('Press enter to stop all nodes.')
