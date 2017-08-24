@@ -6,8 +6,6 @@ A dummy bitcoin simulation.
 ## todo / notes
 
 * kademlia
-    - Change model to node per process
-
     - Identifiers:
         + HASH160 for Node ID
         + SHA1 for Key
