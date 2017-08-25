@@ -39,7 +39,7 @@ def start_network(nodes=3):
     # The first node acts as a bootstrapper for other
     boot_ip = hosts[0].IP()
     hosts[0].cmd(
-        'xterm -hold -geometry 130x40+0+900 -title "bootstrap %s %d" -e python3 -u start_node.py %s %d &' % (
+        'xterm -hold -geometry 130x40+0+900 -title "bootstrap %s %d" -e python3 -u cli.py %s %d &' % (
             boot_ip, BOOT_PORT, boot_ip, BOOT_PORT)
     )
 
