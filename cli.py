@@ -1,14 +1,10 @@
 import asyncio
-import logging
-import os
 import sys
 import signal
-import config
 import re  # regex
 
 from kademlia_dht import Node
 from aioconsole import ainput
-from start_node import setup_logging
 
 
 async def cli(node):
@@ -17,32 +13,42 @@ async def cli(node):
         cmd = await ainput(">>> ")
         cmd = cmd.strip()  # because reads the "\n" when you press enter
 
-        if len(cmd) == 0:
+        if not cmd:  # if empty cmd
             continue
         # can the commands and arguments be handled in a better way?
-        args = re.findall(r'"([^"]*)"', cmd)  # listing all arguments (must be each double quotes)
+
+        # listing all arguments (must be each double quotes)
+        args = re.findall(r'"([^"]*)"', cmd)
         cmd = cmd.split()[0]
 
-        if cmd == 'dht':
+        if cmd == 'id':  # print my id
+            print(node.identifier)
+
+        elif cmd == 'dht':  # print my dht
             print(node)
 
-        elif cmd == 'routing_table':
+        elif cmd == 'routing_table':  # print my routing table
             print(node.routing_table)
 
         elif cmd == 'put':
             if (len(args) != 2):
                 print("Expected 2 arguments, %d given" % len(args))
             else:
-                await node.put(args[0], args[1], False)
+                await node.put(args[0], args[1], hashed=False)
+                # False => key is not already hashed
 
-        elif 'get' in cmd:
+        elif cmd == 'get':
             if (len(args) != 1):
                 print("Expected 1 argument, %d given" % len(args))
             try:
-                value = await node.get(args[0], False)
+                value = await node.get(args[0], hashed=False)
+                # False => key is not already hashed
                 print(value)
             except KeyError:
                 print("Key not found")
+
+        elif cmd == 'help':
+            print("Haven't implemented yet")
 
         else:
             print("Please enter valid input.\nType help to see commands")
@@ -56,15 +62,7 @@ def start_node_with_cli(sock_addr):
     loop.add_signal_handler(signal.SIGINT, loop.stop)
     f = loop.create_datagram_endpoint(Node, local_addr=sock_addr)
     _, node = loop.run_until_complete(f)
-
-    # Setup logging once we have the ID
-    setup_logging(node.identifier)
-
-    logging.getLogger('kademlia').info('MyId: %s', node.identifier)
-
-    # Log the routing table every two second
-    # loop.create_task(log_routing_table(node, interval=2))
-    # loop.create_task(log_dht(node, interval=2))
+    print("MyId :", node.identifier)
     loop.create_task(cli(node))
     loop.run_forever()
 
