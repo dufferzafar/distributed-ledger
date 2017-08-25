@@ -94,8 +94,8 @@ class Node(DatagramRPCProtocol):
         return (self.identifier, ('notfound', self.routing_table.find_closest_peers(key, excluding=peer_identifier)))
 
     @asyncio.coroutine
-    def put(self, raw_key, value, hash=True):
-        if(not hash):
+    def put(self, raw_key, value, hashed=True):  # hashed True key being passed is already hashe
+        if(not hashed):  # hashed False => key passed needs to be hashed to 160bit
             hashed_key = sha1_int(raw_key)
         else:
             hashed_key = raw_key  # dht key is node_id already hashed
@@ -113,8 +113,8 @@ class Node(DatagramRPCProtocol):
         return len(successful)
 
     @asyncio.coroutine
-    def get(self, raw_key, hash=True):
-        if(not hash):
+    def get(self, raw_key, hashed=True):  # hashed True key being passed is already hashe
+        if(not hashed):  # hashed False => key passed needs to be hashed to 160bit
             hashed_key = sha1_int(raw_key)
         else:
             hashed_key = raw_key  
