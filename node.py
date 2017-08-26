@@ -132,34 +132,37 @@ class Node(DatagramRPCProtocol):
 
         """ 2 Phase Commit Protocol """
         """ Phase 1 """
+        
+        # TODO try to implement phase one wihtout using yields inside
+        # yields from or await caues the error : can't pickle generator type objects
+        # has to do wiht the something that the generator is returned within the reply msg
+        # print(receiver_id)
+        # self.is_busy_in_tx = True
+        # try:
+        #     receiver_sock = yield from self.get(self.identifier)  # assuming key of reciever is given in hashed
+        #     print("Receiver Found")
+        # except KeyError:
+        #     self.is_busy_in_tx = False
+        #     return (self.identifier, "Reciever not found")
 
-        print(receiver_id)
-        self.is_busy_in_tx = True
-        try:
-            receiver_sock = yield from self.get(self.identifier)  # assuming key of reciever is given in hashed
-            print("Receiver Found")
-        except KeyError:
-            self.is_busy_in_tx = False
-            return (self.identifier, "Reciever not found")
+        # try:
+        #     witness_sock = yield from self.get(witness_id, hashed=True)  # assuming key of witness is given in hashed
+        #     print("Witness Found")
+        # except KeyError:
+        #     self.is_busy_in_tx = False
+        #     return (self.identifier, "Witness not found")
 
-        try:
-            witness_sock = yield from self.get(witness_id, hashed=True)  # assuming key of witness is given in hashed
-            print("Witness Found")
-        except KeyError:
-            self.is_busy_in_tx = False
-            return (self.identifier, "Witness not found")
+        # witness_status = yield from self.request(receiver_sock, 'become_witness', self.identifier)
+        # if witness_status == "busy":
+        #     self.is_busy_in_tx = False
+        #     return (self.identifier, "Witness Busy. Transaction Aborted!")
+        # print("Witness is Ready")
 
-        witness_status = yield from self.request(receiver_sock, 'become_witness', self.identifier)
-        if witness_status == "busy":
-            self.is_busy_in_tx = False
-            return (self.identifier, "Witness Busy. Transaction Aborted!")
-        print("Witness is Ready")
-
-        receiver_status = yield from self.request(receiver_sock, 'become_receiver', self.identifier)
-        if receiver_status == "busy":
-            self.is_busy_in_tx = False
-            return (self.identifier, "Receiver Busy. Transaction Aborted!")
-        print("Receiver is Ready")
+        # receiver_status = yield from self.request(receiver_sock, 'become_receiver', self.identifier)
+        # if receiver_status == "busy":
+        #     self.is_busy_in_tx = False
+        #     return (self.identifier, "Receiver Busy. Transaction Aborted!")
+        # print("Receiver is Ready")
 
         """ Phase 2"""
         return (self.identifier, "Entering Phase 2")
