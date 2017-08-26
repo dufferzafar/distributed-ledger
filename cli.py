@@ -69,6 +69,8 @@ async def cli(node):
 
         # TODO: Implement rest of the functions and help
 
+        # TODO: Handle socket exceptions
+
 
 def start_node_with_cli(sock_addr):
 

@@ -205,6 +205,7 @@ class Node(DatagramRPCProtocol):
             yield from self.get(self.identifier)
             # search if my public key already in network
         except KeyError:  # key not found
+            # TODO: This should ideally be in __init__
             pub_key, pvt_key = gen_pub_pvt()
             # generate public private key pair
             self.pvt_key = pvt_key
