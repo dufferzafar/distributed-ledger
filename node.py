@@ -29,6 +29,13 @@ def remote(func):
     return inner
 
 
+def normal(func):
+    func.remote_name = func.__name__  # not a remote procedure
+    # done So that this func is also included in the reply functions list
+    func.reply_function = func
+    return func
+
+
 class Node(DatagramRPCProtocol):
 
     def __init__(self, alpha=3, k=20, identifier=None):
