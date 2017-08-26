@@ -31,7 +31,12 @@ async def cli(node):
         cmd = cmd.split()[0]
 
         if cmd == 'id':
-            print(node.identifier)
+            if len(args) == 2:
+                peer = (args[0], int(args[1]))
+                reply = await node.request(peer, "givemeyourid", node.identifier)
+                print(reply)
+            else:
+                print(node.identifier)
 
         elif cmd == 'dht':
             print(node)
@@ -40,7 +45,6 @@ async def cli(node):
             print(node.routing_table)
 
         elif cmd == 'put':
-
             if (len(args) != 2):
                 print("Expected 2 arguments, %d given" % len(args))
             else:

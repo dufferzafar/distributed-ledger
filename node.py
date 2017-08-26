@@ -102,6 +102,11 @@ class Node(DatagramRPCProtocol):
             return (self.identifier, ('found', self.storage[key]))
         return (self.identifier, ('notfound', self.routing_table.find_closest_peers(key, excluding=peer_identifier)))
 
+    @normal
+    def givemeyourid(self, *args, **kwargs):
+        return (self.identifier, self.identifier)  
+        # return a tuple of your id, ans
+
     # TODO: Refactor the hashed part
     @asyncio.coroutine
     def put(self, raw_key, value, hashed=True):  # hashed True key being passed is already hashe

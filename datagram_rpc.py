@@ -31,14 +31,13 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
 
     def datagram_received(self, data, peer):
         logger.info('data_received: %r, %r', peer, data)
+        msg_type, message_identifier, *details = pickle.loads(data)
 
-        direction, message_identifier, *details = pickle.loads(data)
-
-        if direction == 'request':
+        if msg_type == 'request':
             procedure_name, args, kwargs = details
             self.request_received(peer, message_identifier, procedure_name, args, kwargs)
 
-        elif direction == 'reply':
+        elif msg_type == 'reply':
             answer = details[0]
             self.reply_received(peer, message_identifier, answer)
 
@@ -76,7 +75,6 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
 
         obj = ('request', message_identifier, procedure_name, args, kwargs)
         message = pickle.dumps(obj, protocol=0)
-
         self.transport.sendto(message, peer)
 
         return reply
