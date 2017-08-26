@@ -2,7 +2,6 @@
 
 import os
 import sys
-import socket
 import time
 
 import config
@@ -14,7 +13,7 @@ BOOT_PORT = 9000
 
 # The global mininet object
 # Created by start_network
-# Used by start_mininet_control_server
+# Used by start_control_server
 NET = None
 
 
@@ -82,36 +81,13 @@ def start_network(nodes=3):
         host.cmd(c)
 
 
-def start_mininet_control_server():
-
-    print("Mininet Control Server is now running. Press Ctrl+C to exit.")
-
-    # Create & bind to a UDP socket
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
-    # s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-    s.bind(config.MN_CONTROLLER_SOCKET)
-
-    while True:
-        cmd = s.recv(512).strip()
-
-        print(cmd)
-        if cmd == "stop":
-            print("Stop Message Received. Quitting Now.")
-
-            NET.stop()
-            cleanup()
-
-            exit()
-
-
 if __name__ == '__main__':
 
     try:
 
-        start_network(nodes=int(sys.argv[1]))
-
-        start_mininet_control_server()
+        start_network(
+            nodes=int(sys.argv[1])
+        )
 
     except KeyboardInterrupt:
         cleanup()
