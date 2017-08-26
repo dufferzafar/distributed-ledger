@@ -1,17 +1,23 @@
 #!/usr/bin/python
 
-import config
 import os
 import sys
 import time
+
+import config
 
 from mininet.net import Mininet
 from mininet.topo import LinearTopo
 
 BOOT_PORT = 9000
 
+# The global mininet object
+# Created by start_network
+# Used by start_control_server
+NET = None
 
-def cleanup(logs=False):
+
+def cleanup(remove_logs=False):
 
     print("Killing all nodes\n")
     os.system("pkill -SIGINT -f '^python3 -u start_node.py'")
@@ -22,51 +28,66 @@ def cleanup(logs=False):
     # Call standard mn cleanup
     os.system("mn --clean")
 
-    if logs:
+    if remove_logs:
         for f in os.listdir(config.LOG_DIR):
             os.remove(f)
 
 
-def start_network(nodes=3):
-    topo = LinearTopo(k=1, n=nodes)
-    net = Mininet(topo)
+def xterm_cmd(ip, port, b_ip=None, b_port=None):
 
-    hosts = net.hosts
+    if b_ip:
+        title = "Host_%d: " % (port - b_port)
+        file = "start_node.py"
+    else:
+        title = "Bootstrap CLI: "
+        file = "cli.py"
+
+    title = "%s %s %d" % (title, ip, port)
+    args = "%s %d" % (ip, port)
+
+    cmd = 'xterm -hold -geometry 130x40+0+900 -title "%s" -e python3 -u "%s" %s &'
+
+    return cmd % (title, file, args)
+
+
+def start_network(nodes=3):
+    global NET
+
+    NET = Mininet(LinearTopo(k=1, n=nodes))
+    hosts = NET.hosts
 
     # Start the network
-    net.start()
+    NET.start()
 
     # The first node acts as a bootstrapper for other
-    boot_ip = hosts[0].IP()
-    hosts[0].cmd(
-        'xterm -hold -geometry 130x40+0+900 -title "bootstrap %s %d" -e python3 -u cli.py %s %d &' % (
-            boot_ip, BOOT_PORT, boot_ip, BOOT_PORT)
-    )
+    c = xterm_cmd(
+        ip=hosts[0].IP(),
+        port=BOOT_PORT)
+    hosts[0].cmd(c)
 
     # Other nodes
-    port = BOOT_PORT + 1
     for i, host in enumerate(hosts[1:]):
         # Ensure that each consecutive node is spawned with a slight delay
         # so that no two nodes fight for single actual port (127.0.0.1:port)
-        # Every node 10.0.0.*:port is mapped to some 127.0.0.1:port
-        # by mininet ?
+        # Every node 10.0.0.*:port is mapped to some 127.0.0.1:port by mininet
         time.sleep(1)
-        host.cmd('xterm -hold -geometry 130x40+0+900 -title "host_%d %s %d" -e python3 -u start_node.py %s %d %s %d &' %
-                 (i + 1, host.IP(), port, host.IP(), port, boot_ip, BOOT_PORT))
 
-        port += 1
-
-    raw_input('Press enter to stop all nodes.')
-
-    net.stop()
-
-    cleanup()
+        c = xterm_cmd(
+            ip=host.IP(),
+            port=BOOT_PORT + i + 1,
+            b_ip=hosts[0].IP(),
+            b_port=BOOT_PORT
+        )
+        host.cmd(c)
 
 
 if __name__ == '__main__':
+
     try:
+
         start_network(
             nodes=int(sys.argv[1])
         )
+
     except KeyboardInterrupt:
         cleanup()
