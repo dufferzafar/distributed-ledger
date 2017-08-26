@@ -39,23 +39,23 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
             self.request_received(peer, message_identifier, procedure_name, args, kwargs)
 
         elif msg_type == 'reply':
-            answer = details[0]
-            self.reply_received(peer, message_identifier, answer)
+            response = details[0]
+            self.reply_received(peer, message_identifier, response)
 
     def request_received(self, peer, message_identifier, procedure_name, args, kwargs):
         logger.info('received request from %r: %r(*%r, **%r) as message %r',
                     peer, procedure_name, args, kwargs, message_identifier)
 
         reply_function = self.reply_functions[procedure_name]
-        answer = reply_function(self, peer, *args, **kwargs)
-        self.reply(peer, message_identifier, answer)
+        response = reply_function(self, peer, *args, **kwargs)
+        self.reply(peer, message_identifier, response)
 
-    def reply_received(self, peer, message_identifier, answer):
-        logger.info('received reply to message %r, answer %r', message_identifier, answer)
+    def reply_received(self, peer, message_identifier, response):
+        logger.info('received reply to message %r, response %r', message_identifier, response)
 
         if message_identifier in self.outstanding_requests:
             reply = self.outstanding_requests.pop(message_identifier)
-            reply.set_result(answer)
+            reply.set_result(response)
 
     def reply_timed_out(self, message_identifier):
         if message_identifier in self.outstanding_requests:
@@ -80,11 +80,11 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
 
         return reply
 
-    def reply(self, peer, message_identifier, answer):
+    def reply(self, peer, message_identifier, response):
         logger.info("sending reply to %r: (%r, %r)",
-                    peer, message_identifier, answer)
+                    peer, message_identifier, response)
 
-        obj = ('reply', message_identifier, answer)
+        obj = ('reply', message_identifier, response)
         message = pickle.dumps(obj, protocol=0)
 
         self.transport.sendto(message, peer)

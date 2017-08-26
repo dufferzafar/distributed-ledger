@@ -15,17 +15,17 @@ def remote(func):
     """
     A decorator used to indicate an RPC.
 
-    All @remote procedures return a 2-tuple: (node_identifier, answer)
+    All @remote procedures return a 2-tuple: (node_identifier, response)
 
     The node_identifier is consumed by kademlia to update its tables,
-    while the answer is sent as a reply back to the caller.
+    while the response is sent as a reply back to the caller.
     """
     @asyncio.coroutine
     @wraps(func)
     def inner(*args, **kwargs):
         instance, peer, *args = args
-        answer = yield from instance.request(peer, inner.remote_name, *args, **kwargs)
-        return answer
+        response = yield from instance.request(peer, inner.remote_name, *args, **kwargs)
+        return response
 
     # string: name of function
     inner.remote_name = func.__name__
@@ -46,11 +46,18 @@ class Node(DatagramRPCProtocol):
             identifier = random_id()
 
         self.identifier = identifier
+
         self.routing_table = RoutingTable(self.identifier, k=k)
+
+        # Constants from the kademlia protocol
         self.k = k
         self.alpha = alpha
+
+        # Each node has their own dictionary
         self.storage = {}
-        self.is_busy_in_tx = (False, None)  # (True, TransactionId)
+
+        # (Status, TransactionId)
+        self.is_busy_in_tx = (False, None)
 
         super(Node, self).__init__()
 
@@ -67,11 +74,11 @@ class Node(DatagramRPCProtocol):
 
         super(Node, self).request_received(peer, message_identifier, procedure_name, args, kwargs)
 
-    def reply_received(self, peer, message_identifier, answer):
-        peer_identifier, answer = answer
+    def reply_received(self, peer, message_identifier, response):
+        peer_identifier, response = response
         self.routing_table.update_peer(peer_identifier, peer)
 
-        super(Node, self).reply_received(peer, message_identifier, answer)
+        super(Node, self).reply_received(peer, message_identifier, response)
 
     @remote
     def ping(self, peer, peer_identifier):
@@ -94,7 +101,8 @@ class Node(DatagramRPCProtocol):
         logger.info('handling find_node(%r, %r, %r)',
                     peer, peer_identifier, key)
 
-        return (self.identifier, self.routing_table.find_closest_peers(key, excluding=peer_identifier))
+        response = self.routing_table.find_closest_peers(key, excluding=peer_identifier)
+        return (self.identifier, response)
 
     @remote
     def find_value(self, peer, peer_identifier, key):
@@ -102,8 +110,11 @@ class Node(DatagramRPCProtocol):
                     peer, peer_identifier, key)
 
         if key in self.storage:
-            return (self.identifier, ('found', self.storage[key]))
-        return (self.identifier, ('notfound', self.routing_table.find_closest_peers(key, excluding=peer_identifier)))
+            response = ('found', self.storage[key])
+            return (self.identifier, response)
+
+        response = ('notfound', self.routing_table.find_closest_peers(key, excluding=peer_identifier))
+        return (self.identifier, response)
 
     @remote
     def sendmoney(self, caller, receiver, witness, amount):  # after self, the first argument must always be the caller
@@ -183,11 +194,11 @@ class Node(DatagramRPCProtocol):
         if hashed_key in self.storage:
             return self.storage[hashed_key]
         try:
-            answer = yield from self.lookup_node(hashed_key, find_value=True)
+            response = yield from self.lookup_node(hashed_key, find_value=True)
         except KeyError as e:
             raise e
 
-        return answer
+        return response
 
     @asyncio.coroutine
     def lookup_node(self, hashed_key, find_value=False):
