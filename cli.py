@@ -1,7 +1,10 @@
 import asyncio
 import re
 import signal
+import socket
 import sys
+
+import config
 
 from node import Node
 
@@ -9,6 +12,10 @@ from node import Node
 # https://pymotw.com/2/cmd/index.html#module-cmd
 # https://stackoverflow.com/questions/37866403
 from aioconsole import ainput
+
+# A UDP Socket used for interaction with the Mininet Control Server
+MN_SOCK = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+MN_SOCK.bind(("127.0.0.1", 0))
 
 
 async def cli(node):
@@ -73,6 +80,10 @@ async def cli(node):
 
         elif cmd == 'help':
             print("Haven't implemented yet")
+
+        elif cmd == 'stop_network':
+            status = MN_SOCK.sendto(b"stop", config.MN_CONTROLLER_SOCKET)
+            print(status)
 
         else:
             print("Please enter valid input.\nType help to see commands")
