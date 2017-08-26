@@ -36,6 +36,12 @@ def remote(func):
     return inner
 
 
+def idk(func):
+    func.remote_name = func.__name__
+    func.reply_function = func
+    return func
+
+
 class Node(DatagramRPCProtocol):
 
     def __init__(self, alpha=3, k=20, identifier=None):
@@ -117,52 +123,55 @@ class Node(DatagramRPCProtocol):
         return (self.identifier, response)
 
     @remote
-    def sendmoney(self, caller, receiver, witness, amount):  # after self, the first argument must always be the caller
+    def send_bitcoins(self, caller_sock, caller_id, receiver_id, witness_id, amount):  # after self, the first tw oarguments must always be the caller_sock, caller_id
         # this node is the sender
         # caller is the node that initiated this can be sender itself or cli.py
+        print(caller_sock, caller_id, receiver_id, witness_id, amount)
         if self.is_busy_in_tx[0]:
             return "Node already busy in another tx %s"
 
         """ 2 Phase Commit Protocol """
         """ Phase 1 """
+
+        print(receiver_id)
         self.is_busy_in_tx = True
         try:
-            receiver_sock = self.get(receiver, hashed=True)  # assuming key of reciever is given in hashed
+            receiver_sock = iter(yield from self.get(self.identifier))  # assuming key of reciever is given in hashed
             print("Receiver Found")
         except KeyError:
             self.is_busy_in_tx = False
-            return "Reciever not found"
+            return (self.identifier, "Reciever not found")
 
         try:
-            witness_sock = self.get(witness, hashed=True)  # assuming key of witness is given in hashed
+            witness_sock = yield from self.get(witness_id, hashed=True)  # assuming key of witness is given in hashed
             print("Witness Found")
         except KeyError:
             self.is_busy_in_tx = False
-            return "Witness not found"
+            return (self.identifier, "Witness not found")
 
         witness_status = yield from self.request(receiver_sock, 'become_witness', self.identifier)
         if witness_status == "busy":
             self.is_busy_in_tx = False
-            return "Witness Busy. Transaction Aborted!"
+            return (self.identifier, "Witness Busy. Transaction Aborted!")
         print("Witness is Ready")
 
         receiver_status = yield from self.request(receiver_sock, 'become_receiver', self.identifier)
         if receiver_status == "busy":
             self.is_busy_in_tx = False
-            return "Receiver Busy. Transaction Aborted!"
+            return (self.identifier, "Receiver Busy. Transaction Aborted!")
         print("Receiver is Ready")
 
         """ Phase 2"""
-        return "Entering Phase 2"
+        return (self.identifier, "Entering Phase 2")
 
     # TODO Implement become_witness and become_receiver function
     @remote
     def become_receiver(self, sender):
-        return "busy"
+        return (self.identifier, "busy")
 
     @remote
     def become_witness(self, sender):
-        return "yes"
+        return (slef.identifier, "yes")
 
     # TODO: Refactor the hashed part
     @asyncio.coroutine
@@ -190,7 +199,6 @@ class Node(DatagramRPCProtocol):
             hashed_key = sha1_int(raw_key)
         else:
             hashed_key = raw_key
-
         if hashed_key in self.storage:
             return self.storage[hashed_key]
         try:
