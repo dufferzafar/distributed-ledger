@@ -3,7 +3,7 @@ import re
 import signal
 import sys
 
-from kademlia_dht import Node
+from node import Node
 
 # TODO: Is cmd module made async a better alternative?
 # https://pymotw.com/2/cmd/index.html#module-cmd

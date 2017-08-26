@@ -33,7 +33,8 @@ class Node(DatagramRPCProtocol):
 
     def __init__(self, alpha=3, k=20, identifier=None):
 
-        # Use HASH160
+        # TODO: Make the node id a function of node's public key
+        # Just like Bitcoin wallet IDs use HASH160
         if identifier is None:
             identifier = random_id()
 
