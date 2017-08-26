@@ -53,7 +53,7 @@ def start_network(nodes=3):
         time.sleep(1)
         host.cmd('xterm -hold -geometry 130x40+0+900 -title "host_%d %s %d" -e python3 -u start_node.py %s %d %s %d &' %
                  (i + 1, host.IP(), port, host.IP(), port, boot_ip, BOOT_PORT))
-        
+
         port += 1
 
     raw_input('Press enter to stop all nodes.')
@@ -61,6 +61,7 @@ def start_network(nodes=3):
     net.stop()
 
     cleanup()
+
 
 if __name__ == '__main__':
     try:

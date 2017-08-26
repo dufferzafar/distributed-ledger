@@ -61,7 +61,7 @@ async def cli(node):
             except KeyError:
                 print("Key not found")
         elif cmd == 'send_money':
-            
+
             try:
                 send_sock = await node.get(int(args[0]), hashed=True)
                 print(send_sock)
@@ -70,7 +70,6 @@ async def cli(node):
 
             except KeyError:
                 print("Key not found")
-
 
         elif cmd == 'help':
             print("Haven't implemented yet")

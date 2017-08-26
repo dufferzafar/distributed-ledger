@@ -69,7 +69,7 @@ class Transaction(object):
 
             # The output list of TxOutputs will contain address of receiver(s)
             outputs
-            ):
+    ):
 
         self.inputs = inputs
         self.witness_id = witness_id
@@ -77,6 +77,7 @@ class Transaction(object):
 
     def __repr__(self):
         return repr(self.inputs)
+
 
 # This code will not be executed when this module is imported
 # but will executed if it is run straight from the CLI

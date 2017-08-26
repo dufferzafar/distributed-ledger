@@ -6,6 +6,7 @@ import socket
 from utils import sha1_int, random_id
 logger = logging.getLogger(__name__)
 
+
 class DatagramRPCProtocol(asyncio.DatagramProtocol):
 
     def __init__(self, reply_timeout=5):

@@ -123,24 +123,24 @@ class Node(DatagramRPCProtocol):
             return "Reciever not found"
 
         try:
-            witness_sock = self.get(witness, hashed=True) # assuming key of witness is given in hashed
+            witness_sock = self.get(witness, hashed=True)  # assuming key of witness is given in hashed
             print("Witness Found")
         except KeyError:
             self.is_busy_in_tx = False
             return "Witness not found"
-        
+
         witness_status = yield from self.request(receiver_sock, 'become_witness', self.identifier)
         if witness_status == "busy":
             self.is_busy_in_tx = False
             return "Witness Busy. Transaction Aborted!"
         print("Witness is Ready")
-        
+
         receiver_status = yield from self.request(receiver_sock, 'become_receiver', self.identifier)
         if receiver_status == "busy":
             self.is_busy_in_tx = False
             return "Receiver Busy. Transaction Aborted!"
         print("Receiver is Ready")
-        
+
         """ Phase 2"""
         return "Entering Phase 2"
 
