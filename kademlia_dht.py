@@ -45,6 +45,7 @@ class Node(DatagramRPCProtocol):
 
         super(Node, self).__init__()
 
+    # TODO: This method should ideally be called dht()
     def __str__(self):
         dht = ""
         for k, v in self.storage.items():
@@ -93,6 +94,7 @@ class Node(DatagramRPCProtocol):
             return (self.identifier, ('found', self.storage[key]))
         return (self.identifier, ('notfound', self.routing_table.find_closest_peers(key, excluding=peer_identifier)))
 
+    # TODO: Refactor the hashed part
     @asyncio.coroutine
     def put(self, raw_key, value, hashed=True):  # hashed True key being passed is already hashe
         if(not hashed):  # hashed False => key passed needs to be hashed to 160bit
@@ -117,7 +119,7 @@ class Node(DatagramRPCProtocol):
         if(not hashed):  # hashed False => key passed needs to be hashed to 160bit
             hashed_key = sha1_int(raw_key)
         else:
-            hashed_key = raw_key  
+            hashed_key = raw_key
 
         if hashed_key in self.storage:
             return self.storage[hashed_key]
