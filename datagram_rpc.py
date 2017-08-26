@@ -61,7 +61,7 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
             reply = self.outstanding_requests.pop(message_identifier)
             reply.set_exception(socket.timeout)
 
-    def request(self, peer, procedure_name, *args, **kwargs):
+    def request(self, peer, procedure_name, *args, **kwargs):  # args[0] must always be senders nodeid
         message_identifier = random_id()
 
         logger.info("sending request to %r: %r(*%r, **%r) as message %r",

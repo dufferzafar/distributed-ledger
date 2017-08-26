@@ -50,6 +50,7 @@ class Node(DatagramRPCProtocol):
         self.k = k
         self.alpha = alpha
         self.storage = {}
+        self.is_busy_in_tx = (False, None)  # (True, TransactionId)
 
         super(Node, self).__init__()
 
@@ -104,6 +105,47 @@ class Node(DatagramRPCProtocol):
             return (self.identifier, ('found', self.storage[key]))
         return (self.identifier, ('notfound', self.routing_table.find_closest_peers(key, excluding=peer_identifier)))
 
+    @remote
+    def sendmoney(self, caller, receiver, witness, amount):  # after self, the first argument must always be the caller
+        # this node is the sender
+        # caller is the node that initiated this can be sender itself or cli.py
+        if self.is_busy_in_tx[0]:
+            return "Node already busy in another tx %s"
+
+        """ 2 Phase Commit Protocol """
+        """ Phase 1 """
+        self.is_busy_in_tx = True
+        try:
+            receiver_sock = self.get(receiver, hashed=True)  # assuming key of reciever is given in hashed
+            print("Receiver Found")
+        except KeyError:
+            self.is_busy_in_tx = False
+            return "Reciever not found"
+
+        try:
+            witness_sock = self.get(witness, hashed=True) # assuming key of witness is given in hashed
+            print("Witness Found")
+        except KeyError:
+            self.is_busy_in_tx = False
+            return "Witness not found"
+        
+        witness_status = yield from self.request(receiver_sock, 'become_witness', self.identifier)
+        if witness_status == "busy":
+            self.is_busy_in_tx = False
+            return "Witness Busy. Transaction Aborted!"
+        print("Witness is Ready")
+        
+        receiver_status = yield from self.request(receiver_sock, 'become_receiver', self.identifier)
+        if receiver_status == "busy":
+            self.is_busy_in_tx = False
+            return "Receiver Busy. Transaction Aborted!"
+        print("Receiver is Ready")
+        
+        """ Phase 2"""
+        return "Entering Phase 2"
+
+        
+    # TODO Implement become_witness and become_receiver function
     # TODO: Refactor the hashed part
     @asyncio.coroutine
     def put(self, raw_key, value, hashed=True):  # hashed True key being passed is already hashe
