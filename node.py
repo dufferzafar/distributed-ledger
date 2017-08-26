@@ -12,7 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 def remote(func):
+    """
+    A decorator used to indicate an RPC.
 
+    All @remote procedures return a 2-tuple: (node_identifier, answer)
+
+    The node_identifier is consumed by kademlia to update its tables,
+    while the answer is sent as a reply back to the caller.
+    """
     @asyncio.coroutine
     @wraps(func)
     def inner(*args, **kwargs):
@@ -20,20 +27,13 @@ def remote(func):
         answer = yield from instance.request(peer, inner.remote_name, *args, **kwargs)
         return answer
 
-    # String: name of function
+    # string: name of function
     inner.remote_name = func.__name__
 
-    # Callable: function object
+    # callable: function object
     inner.reply_function = func
 
     return inner
-
-
-def normal(func):
-    func.remote_name = func.__name__  # not a remote procedure
-    # done So that this func is also included in the reply functions list
-    func.reply_function = func
-    return func
 
 
 class Node(DatagramRPCProtocol):
@@ -76,6 +76,8 @@ class Node(DatagramRPCProtocol):
     def ping(self, peer, peer_identifier):
         logger.info('handling ping(%r, %r)', peer, peer_identifier)
 
+        # The 1st identifier is consumed by kademlia
+        # While the 2nd is sent as a reply back to the caller
         return (self.identifier, self.identifier)
 
     @remote
@@ -101,11 +103,6 @@ class Node(DatagramRPCProtocol):
         if key in self.storage:
             return (self.identifier, ('found', self.storage[key]))
         return (self.identifier, ('notfound', self.routing_table.find_closest_peers(key, excluding=peer_identifier)))
-
-    @normal
-    def givemeyourid(self, *args, **kwargs):
-        return (self.identifier, self.identifier)  
-        # return a tuple of your id, ans
 
     # TODO: Refactor the hashed part
     @asyncio.coroutine

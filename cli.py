@@ -32,9 +32,9 @@ async def cli(node):
 
         if cmd == 'id':
             if len(args) == 2:
-                peer = (args[0], int(args[1]))
-                reply = await node.request(peer, "givemeyourid", node.identifier)
-                print(reply)
+                peer_socket = (args[0], int(args[1]))
+                peer_id = await node.request(peer_socket, "ping", node.identifier)
+                print(peer_id)
             else:
                 print(node.identifier)
 
