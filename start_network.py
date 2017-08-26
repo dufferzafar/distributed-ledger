@@ -4,6 +4,8 @@ import os
 import sys
 import time
 
+from cmd import Cmd as REPL
+
 import config
 
 from mininet.net import Mininet
@@ -81,6 +83,19 @@ def start_network(nodes=3):
         host.cmd(c)
 
 
+class MininetREPL(REPL):
+    intro = "Control the bitcoin simulation network. Type help or ? to list commands.\n"
+    prompt = ">>> "
+
+    def do_stop_network(self, arg):
+        """Stop network, close xterms, and exit."""
+
+        print('Quitting now.')
+
+        NET.stop()
+        cleanup()
+        exit()
+
 if __name__ == '__main__':
 
     try:
@@ -88,6 +103,8 @@ if __name__ == '__main__':
         start_network(
             nodes=int(sys.argv[1])
         )
+
+        MininetREPL().cmdloop()
 
     except KeyboardInterrupt:
         cleanup()
