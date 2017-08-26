@@ -144,8 +144,15 @@ class Node(DatagramRPCProtocol):
         """ Phase 2"""
         return "Entering Phase 2"
 
-        
     # TODO Implement become_witness and become_receiver function
+    @remote
+    def become_receiver(self, sender):
+        return "busy"
+
+    @remote
+    def become_witness(self, sender):
+        return "yes"
+
     # TODO: Refactor the hashed part
     @asyncio.coroutine
     def put(self, raw_key, value, hashed=True):  # hashed True key being passed is already hashe
