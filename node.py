@@ -136,7 +136,7 @@ class Node(DatagramRPCProtocol):
         print(receiver_id)
         self.is_busy_in_tx = True
         try:
-            receiver_sock = iter(yield from self.get(self.identifier))  # assuming key of reciever is given in hashed
+            receiver_sock = yield from self.get(self.identifier)  # assuming key of reciever is given in hashed
             print("Receiver Found")
         except KeyError:
             self.is_busy_in_tx = False

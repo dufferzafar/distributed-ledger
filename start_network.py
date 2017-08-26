@@ -40,12 +40,13 @@ def xterm_cmd(ip, port, b_ip=None, b_port=None):
     if b_ip:
         title = "Host_%d: " % (port - b_port)
         file = "start_node.py"
+        args = "%s %d %s %d" % (ip, port, b_ip, b_port)
     else:
         title = "Bootstrap CLI: "
         file = "cli.py"
+        args = "%s %d" % (ip, port)
 
     title = "%s %s %d" % (title, ip, port)
-    args = "%s %d" % (ip, port)
 
     cmd = 'xterm -hold -geometry 130x40+0+900 -title "%s" -e python3 -u "%s" %s &'
 
