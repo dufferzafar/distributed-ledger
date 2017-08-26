@@ -13,7 +13,7 @@ def setup_logging(node_id):
     if not os.path.exists(config.LOG_DIR):
         os.mkdir(config.LOG_DIR)
 
-    kademlia_logger = logging.getLogger('kademlia')
+    kademlia_logger = logging.getLogger('node')
     kademlia_logger.setLevel(logging.DEBUG)
 
     stream_handler = logging.StreamHandler()
@@ -36,7 +36,7 @@ def continuous_ping(node, to, interval=5):
 @asyncio.coroutine
 def log_routing_table(node, interval=5):
     while True:
-        logger = logging.getLogger('kademlia')
+        logger = logging.getLogger('node')
         logger.info("Routing Table\n" + str(node.routing_table))
         yield from asyncio.sleep(interval)
 
@@ -44,7 +44,7 @@ def log_routing_table(node, interval=5):
 @asyncio.coroutine
 def log_dht(node, interval=5):
     while True:
-        logger = logging.getLogger('kademlia')
+        logger = logging.getLogger('node')
         logger.info("DHT\n" + str(node))
         yield from asyncio.sleep(interval)
 
@@ -60,7 +60,7 @@ def start_a_node(sock_addr, bootstrap_addr=None):
     # Setup logging once we have the ID
     setup_logging(node.identifier)
 
-    logging.getLogger('kademlia').info('MyId: %s', node.identifier)
+    logging.getLogger('node').info('MyId: %s', node.identifier)
 
     # For nodes that are not bootstrapper
     if bootstrap_addr:
