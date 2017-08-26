@@ -9,6 +9,7 @@ from node import Node
 # https://pymotw.com/2/cmd/index.html#module-cmd
 # https://stackoverflow.com/questions/37866403
 from aioconsole import ainput
+from cli_utils import get_sock_from_name
 
 
 async def cli(node):
@@ -60,16 +61,26 @@ async def cli(node):
                 print(value)
             except KeyError:
                 print("Key not found")
-        elif cmd == 'send_money':
 
-            try:
-                send_sock = await node.get(int(args[0]), hashed=True)
-                print(send_sock)
-                reply = await node.request(send_sock, "send_money", node.identifier, int(args[1]), int(args[2]), args[3])
-                print(reply)
+        elif cmd == 'send_bitcoins':
 
-            except KeyError:
-                print("Key not found")
+            if (len(args) != 4):
+                print("Expected 4 arguments, %d given" % len(args))
+            else:
+                try:
+                    sender_sock = get_sock_from_name(args[0])
+                    receiver_sock = get_sock_from_name(args[1])
+                    witness_sock = get_sock_from_name(args[2])
+
+                    receiver_id = await node.request(receiver_sock, 'ping', node.identifier)
+                    witness_id = await node.request(witness_sock, 'ping', node.identifier)
+                    amount = int(args[3])
+
+                    reply = await node.request(sender_sock, "send_bitcoins", node.identifier, int(receiver_id), int(witness_id), amount)
+                    print(reply)
+
+                except Exception as e:
+                    print("Exception Caught : ", e)
 
         elif cmd == 'help':
             print("Haven't implemented yet")
