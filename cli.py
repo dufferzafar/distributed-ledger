@@ -11,7 +11,7 @@ from node import Node
 from aioconsole import ainput
 from cli_utils import get_sock_from_name
 from start_node import handle_trans
-
+from utils import random_id,sha1_int
 
 async def cli(node):
 
@@ -87,7 +87,8 @@ async def cli(node):
             print("Haven't implemented yet")
 
         elif cmd == 'broadcast':
-            x = await node.request(("255.255.255.255", 9000), "ping", node.identifier)
+            node.broadcast(random_id(), 'store', node.identifier, sha1_int("harish"), "chandra")
+            # node.broadcast(random_id(), 'ping', node.identifier)
 
         else:
             print("Please enter valid input.\nType help to see commands")
