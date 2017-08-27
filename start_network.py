@@ -9,6 +9,7 @@ from cmd import Cmd as REPL
 import config
 
 from mininet.net import Mininet
+from mininet.cli import CLI
 from mininet.topo import LinearTopo
 
 # The global mininet object
@@ -99,6 +100,11 @@ class MininetREPL(REPL):
         NET.stop()
         cleanup()
         exit()
+
+    def do_mn_cli(self, arg):
+        """Run mininet CLI."""
+
+        CLI(NET)
 
 if __name__ == '__main__':
 
