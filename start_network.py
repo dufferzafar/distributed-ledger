@@ -44,7 +44,7 @@ def xterm_cmd(ip, port, b_ip=None, b_port=None):
         args = "%s %d %s %d" % (ip, port, b_ip, b_port)
     else:
         title = "Bootstrap CLI: "
-        file = "cli.py"
+        file = "start_repl_node.py"
         args = "%s %d" % (ip, port)
 
     title = "%s %s %d" % (title, ip, port)
