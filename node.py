@@ -190,6 +190,7 @@ class Node(DatagramRPCProtocol):
             # TODO add transactoin to ledgger
             # if successfull return commit else reutrn false
             print("Commit Successfull!")
+            self.isbusy = (False, None)  # Now node is free
             return (self.identifier, "committed")
 
     @remote

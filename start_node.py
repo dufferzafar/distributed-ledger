@@ -7,7 +7,7 @@ import config
 
 from node import Node
 from trans import Transaction
-
+from utils import random_id
 
 def setup_logging(node_id):
 
@@ -60,28 +60,29 @@ def handle_trans(node):
                 """Phase 1"""
                 print("I am sender")
                 receiver_sock = (yield from node.get(tx.receiver))[0]
-                receiver_status = yield from node.request(receiver_sock, "become_receiver", node.identifier, tx)
+                receiver_status = yield from node.become_receiver(receiver_sock, node.identifier, tx)
                 witness_sock = (yield from node.get(tx.witness))[0]
-                witness_status = yield from node.request(witness_sock, "become_witness", node.identifier, tx)
+                witness_status = yield from node.become_witness(witness_sock, node.identifier, tx)
 
                 if receiver_status == "busy" or witness_status == "busy":
-                    receiver_abort = yield from node.request(receiver_sock, "abort_tx", node.identifier, tx)  # send abort to receiver
-                    witness_abort = yield from node.request(witness_sock, "abort_tx", node.identifier, tx)  # send abort to witness
+                    receiver_abort = yield from node.abort_tx(receiver_sock, node.identifier, tx)  # send abort to receiver
+                    witness_abort = yield from node.abort_tx(witness_sock, node.identifier, tx)  # send abort to witness
 
                     if (witness_abort == "aborted" and receiver_abort == "aborted"):
                         yield from node.abort_tx(node.transport.get_extra_info('sockname'), node.identifier, tx)  # send abort to itslef(sender)
                 else:
                     print("Phase 1 Complete. Entering Phase two")
                     """ Phase 2 """
-                    receiver_commit = yield from node.request(receiver_sock, "commit_tx", node.identifier, tx)  # send commit to receiver
-                    witness_commit = yield from node.request(witness_sock, "commit_tx", node.identifier, tx)  # send commit to receiver
+                    receiver_commit = yield from node.commit_tx(receiver_sock, node.identifier, tx)  # send commit to receiver
+                    witness_commit = yield from node.commit_tx(witness_sock, node.identifier, tx)  # send commit to receiver
 
                     if (witness_commit == "committed" and receiver_commit == "committed"):
-                        yield from node.commit_tx(node.transport.get_extra_info('sockname'), node.identifier, tx)  # send abort to itslef(sender)
+                        yield from node.commit_tx(node.transport.get_extra_info('sockname'), node.identifier, tx)  # Commit transaction
                         # TODO broadcast
+                        node.isbusy = (False,None)
                     else:
-                        receiver_abort = yield from node.request(receiver_sock, "abort_tx", node.identifier, tx)  # send abort to receiver
-                        witness_abort = yield from node.request(witness_sock, "abort_tx", node.identifier, tx)  # send abort to witness
+                        receiver_abort = yield from node.abort_tx(receiver_sock, node.identifier, tx)  # send abort to receiver
+                        witness_abort = yield from node.abort_tx(witness_sock, node.identifier, tx)  # send abort to witness
 
                         if (witness_abort == "aborted" and receiver_abort == "aborted"):
                             yield from node.abort_tx(node.transport.get_extra_info('sockname'), node.identifier, tx)  # send abort to itslef(sender)
