@@ -11,6 +11,7 @@ import config
 
 from mininet.net import Mininet
 from mininet.cli import CLI
+from mininet.link import Link
 from mininet.topo import LinearTopo
 
 # The global mininet object
@@ -101,6 +102,35 @@ class MininetREPL(REPL):
         NET.stop()
         cleanup()
         exit()
+
+    def do_add_node(self, arg):
+        """Spawn a new node."""
+
+        host_num = len(NET.hosts) + 1
+
+        end_switch = NET.switches[-1]
+
+        new_switch = NET.addSwitch('s%d' % host_num)
+        new_host = NET.addHost("h%d" % host_num)
+
+        Link(new_host, new_switch)
+        slink = Link(end_switch, new_switch)
+
+        end_switch.attach(slink.intf1)
+
+        new_switch.start(NET.controllers)
+        new_host.configDefault(defaultRoute=new_host.defaultIntf())
+
+        c = xterm_cmd(
+            ip=new_host.IP(),
+            port=config.PORT,
+            b_ip=NET.hosts[0].IP(),
+            b_port=config.PORT
+        )
+
+        new_host.cmd(c % host_num)
+
+        print("Started new node: %s" % new_host)
 
     def do_mn_cli(self, arg):
         """Run mininet CLI."""
