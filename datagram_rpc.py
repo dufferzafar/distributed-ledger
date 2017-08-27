@@ -33,6 +33,9 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
     def datagram_received(self, data, peer):
         logger.info('data_received: %r, %r', peer, data)
         msg_type, message_identifier, *details = pickle.loads(data)
+        if msg_type == 'broadcast':
+            procedure_name, *args = details
+            self.broadcast_received(peer, message_identifier, procedure_name, *args)
 
         if msg_type == 'request':
             procedure_name, args, kwargs = details
