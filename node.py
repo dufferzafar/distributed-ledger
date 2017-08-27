@@ -147,7 +147,7 @@ class Node(DatagramRPCProtocol):
 
     # TODO Implement become_witness and become_receiver function
     @remote
-    def become_receiver(self, sender_sock, sender_id, tx):
+    def become_receiver(self, peer_sock, peer_id, tx):
         if self.isbusy[0] and self.isbusy[1] != tx:  # check if node busy in other trans
             return (self.identifier, "busy")  # return busy
         else:
@@ -158,7 +158,7 @@ class Node(DatagramRPCProtocol):
             return (self.identifier, "yes")  # return yes
 
     @remote
-    def become_witness(self, sender_sock, sender_id, tx):
+    def become_witness(self, peer_sock, peer_id, tx):
         if self.isbusy[0] and self.isbusy[1] != tx:  # check if node busy in other trans
             return (self.identifier, "busy")  # return busy
         else:
@@ -167,6 +167,13 @@ class Node(DatagramRPCProtocol):
             # if everything is fine
             self.isbusy = (True, tx)  # set node busy in tx
             return (self.identifier, "yes")  # return yes
+
+    @remote
+    def abort_tx(self, peer, peer_id, tx):
+        # remove transaction from ledger if already added
+        self.isbusy = (False, None)
+        print("Transction aborted")
+        return (self.identifier, "aborted")
 
     # TODO: Refactor the hashed part
     @asyncio.coroutine
