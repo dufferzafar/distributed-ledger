@@ -7,6 +7,7 @@ from functools import wraps
 from routing_table import RoutingTable
 from utils import sha1_int, random_id, gen_pub_pvt
 from datagram_rpc import DatagramRPCProtocol
+from trans import Transaction
 
 logger = logging.getLogger(__name__)
 
@@ -62,8 +63,8 @@ class Node(DatagramRPCProtocol):
         # Each node has their own dictionary
         self.storage = {}
 
-        # (Status, TransactionId)
-        self.is_busy_in_tx = (False, None)
+        # (Status, Transaction)
+        self.isbusy = (False, None)
 
         super(Node, self).__init__()
 
@@ -126,46 +127,23 @@ class Node(DatagramRPCProtocol):
     def send_bitcoins(self, caller_sock, caller_id, receiver_id, witness_id, amount):  # after self, the first tw oarguments must always be the caller_sock, caller_id
         # this node is the sender
         # caller is the node that initiated this can be sender itself or cli.py
-        print(caller_sock, caller_id, receiver_id, witness_id, amount)
-        if self.is_busy_in_tx[0]:
-            return "Node already busy in another tx %s"
 
-        """ 2 Phase Commit Protocol """
-        """ Phase 1 """
-        
-        # TODO try to implement phase one wihtout using yields inside
-        # yields from or await caues the error : can't pickle generator type objects
-        # has to do wiht the something that the generator is returned within the reply msg
-        # print(receiver_id)
-        # self.is_busy_in_tx = True
-        # try:
-        #     receiver_sock = yield from self.get(self.identifier)  # assuming key of reciever is given in hashed
-        #     print("Receiver Found")
-        # except KeyError:
-        #     self.is_busy_in_tx = False
-        #     return (self.identifier, "Reciever not found")
+        response = ""
 
-        # try:
-        #     witness_sock = yield from self.get(witness_id, hashed=True)  # assuming key of witness is given in hashed
-        #     print("Witness Found")
-        # except KeyError:
-        #     self.is_busy_in_tx = False
-        #     return (self.identifier, "Witness not found")
+        # TODO Generate a transaction based on amount
 
-        # witness_status = yield from self.request(receiver_sock, 'become_witness', self.identifier)
-        # if witness_status == "busy":
-        #     self.is_busy_in_tx = False
-        #     return (self.identifier, "Witness Busy. Transaction Aborted!")
-        # print("Witness is Ready")
+        gen_status = True  # call gen transaction
+        tx = Transaction(self.identifier, receiver_id, witness_id)  # denotes the generated transaction
 
-        # receiver_status = yield from self.request(receiver_sock, 'become_receiver', self.identifier)
-        # if receiver_status == "busy":
-        #     self.is_busy_in_tx = False
-        #     return (self.identifier, "Receiver Busy. Transaction Aborted!")
-        # print("Receiver is Ready")
+        if not gen_status:
+            response = "Not enough balance"
+        elif self.isbusy[0]:
+            response = "Node already busy in another tx %d" % (self.isbusy[1].id)
+        else:
+            self.isbusy = (True, tx)
+            response = "Initiating two phase commit Protocol from %d to %d using %d as witness." % (self.identifier, receiver_id, witness_id)
 
-        """ Phase 2"""
-        return (self.identifier, "Entering Phase 2")
+        return (self.identifier, response)
 
     # TODO Implement become_witness and become_receiver function
     @remote
