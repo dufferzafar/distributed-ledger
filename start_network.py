@@ -106,7 +106,7 @@ class MininetREPL(REPL):
     def do_add_node(self, arg):
         """Spawn a new node."""
 
-        host_num = len(NET.hosts) + 1
+        host_num = len(NET.hosts)
 
         end_switch = NET.switches[-1]
 
