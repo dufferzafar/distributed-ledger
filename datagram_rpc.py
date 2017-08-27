@@ -33,9 +33,9 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
     def datagram_received(self, data, peer):
         logger.info('data_received: %r, %r', peer, data)
         msg_type, message_identifier, *details = pickle.loads(data)
-        if msg_type == 'broadcast':
-            procedure_name, *args = details
-            self.broadcast_received(peer, message_identifier, procedure_name, *args)
+        if msg_type == 'broadcast':  # if msg_type is broadcast
+            procedure_name, *args = details 
+            self.broadcast_received(peer, message_identifier, procedure_name, *args)  # call node's broadcast_received
 
         if msg_type == 'request':
             procedure_name, args, kwargs = details
@@ -45,11 +45,11 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
             response = details[0]
             self.reply_received(peer, message_identifier, response)
 
-    def broadcast_received(self, peer, message_identifier, procedure_name, *args):
+    def broadcast_received(self, peer, message_identifier, procedure_name, *args):  
         logger.info('received broadcast from %r: %r(*%r) as message %r',
                     peer, procedure_name, args, message_identifier)
-        reply_function = self.reply_functions[procedure_name]
-        reply_function(self, peer, *args)
+        reply_function = self.reply_functions[procedure_name]  
+        reply_function(self, peer, *args)  # call the appropriate function as per procedure name
 
     def request_received(self, peer, message_identifier, procedure_name, args, kwargs):
         logger.info('received request from %r: %r(*%r, **%r) as message %r',

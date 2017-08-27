@@ -17,6 +17,7 @@ def remote(func):
     """
     A decorator used to indicate an RPC.
 
+    All @remote procedures if explicitly called via a request message must have node.identifier as the first argument
     All @remote procedures return a 2-tuple: (node_identifier, response)
 
     The node_identifier is consumed by kademlia to update its tables,
@@ -80,13 +81,13 @@ class Node(DatagramRPCProtocol):
         return dht
 
     def broadcast_received(self, peer, message_identifier, procedure_name, *args):
-        peer_identifier = args[0]
-        self.routing_table.update_peer(peer_identifier, peer)
+        peer_identifier = args[0]  
+        self.routing_table.update_peer(peer_identifier, peer)  # update the routing table
 
-        if message_identifier not in self.broadcast_list:
-            self.broadcast_list.append(message_identifier)
-            self.broadcast(message_identifier, procedure_name, *args)
-            super(Node, self).broadcast_received(peer, message_identifier, procedure_name, *args)
+        if message_identifier not in self.broadcast_list:  # if message identifier is not in list
+            self.broadcast_list.append(message_identifier)  # append it to broadcast list
+            self.broadcast(message_identifier, procedure_name, *args)  # broadcast it to other peers
+            super(Node, self).broadcast_received(peer, message_identifier, procedure_name, *args)  # call super's broadcast received that will call the procedure_name
         else:
             print("Old Message")
 
@@ -201,15 +202,24 @@ class Node(DatagramRPCProtocol):
 
         return (self.identifier, "Not involved in this transaction")
 
+    """
+    Broadcast - Broadcasts a message containing a procedure_name to all the nodes
+    who execute it
+  
+    Arguments:
+        message_identifier : unique msg id for each broadcast
+        procedure_name : name of the remote procedure to be executed
+        args : parameters for that procedure
+    """
     def broadcast(self, message_identifier, procedure_name, *args, **kwargs):
 
         logger.info("received a broadcast for procedure %r as message %r", procedure_name, message_identifier)
 
-        obj = ('broadcast', message_identifier, procedure_name, *args)
+        obj = ('broadcast', message_identifier, procedure_name, *args)  # creating an mesage object with msgtype, procedure_name and its args
         message = pickle.dumps(obj, protocol=0)
 
         for _, peer in self.routing_table:
-            self.transport.sendto(message, peer)
+            self.transport.sendto(message, peer)  # sending the broadcast msg to each connected peer
 
     # TODO: Refactor the hashed part
     @asyncio.coroutine
