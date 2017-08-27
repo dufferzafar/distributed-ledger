@@ -37,24 +37,29 @@ def gen_pub_pvt():
     return pub_key, pvt_key
 
 
-# msg must be a bytes object - NOT str/unicode
 def sign_msg(pvt_key, msg):
     pvt_key = binascii.unhexlify(pvt_key.encode())
     sk = ecdsa.SigningKey.from_string(pvt_key, curve=CURVE)
 
-    return sk.sign(msg)
+    sign = sk.sign(msg.encode())
+    sign = binascii.hexlify(sign).decode()
+
+    return sign
 
 
 def verify_msg(pub_key, msg, sign):
     pub_key = binascii.unhexlify(pub_key.encode())
     vk = ecdsa.VerifyingKey.from_string(pub_key, curve=CURVE)
 
-    return vk.verify(sign, msg)
+    sign = binascii.unhexlify(sign.encode())
+
+    return vk.verify(sign, msg.encode())
+
 
 if __name__ == '__main__':
 
     # Test out signing & verification
-    msg = b"Shadab Zafar"
+    msg = "Shadab Zafar"
 
     pub, pvt = gen_pub_pvt()
 
