@@ -139,7 +139,7 @@ class Node(DatagramRPCProtocol):
         return (self.identifier, response)
 
     @remote
-    def send_bitcoins(self, caller_sock, caller_id, receiver_id, witness_id, amount):  # after self, the first tw oarguments must always be the caller_sock, caller_id
+    def send_bitcoins(self, peer_sock, peer_id, receiver_id, witness_id, amount):  # after self, the first tw oarguments must always be the peer_sock, peer_id
         # this node is the sender
         # caller is the node that initiated this can be sender itself or cli.py
 
