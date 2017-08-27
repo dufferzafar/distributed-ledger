@@ -112,6 +112,7 @@ def start_node_with_cli(sock_addr):
     node.socket_addr = node.transport.get_extra_info('sockname')
 
     loop.run_until_complete(node.store(node.socket_addr, node.identifier, node.identifier, (node.socket_addr, node.pub_key)))  # store my pub_key in my dht
+    loop.create_task(handle_trans(node))
     loop.create_task(cli(node))
     loop.run_forever()
 
