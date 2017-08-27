@@ -57,8 +57,24 @@ def handle_trans(node):
             tx = node.isbusy[1]  # get that transaction
 
             if tx.sender == node.identifier:
+                """Phase 1"""
                 print("I am sender")
+                receiver_sock = (yield from node.get(tx.receiver))[0]
+                receiver_status = yield from node.request(receiver_sock, "become_receiver", node.identifier, tx)
+                witness_sock = (yield from node.get(tx.witness))[0]
+                witness_status = yield from node.request(witness_sock, "become_witness", node.identifier, tx)
+
+                if receiver_status == "busy" or witness_status == "busy":
+                    receiver_abort = yield from node.request(receiver_sock, "abort_tx", node.identifier, tx)  # send abort to receiver
+                    witness_abort = yield from node.request(witness_sock, "abort_tx", node.identifier, tx)  # send abort to witness
+
+                    if (witness_abort == "aborted" and receiver_abort == "aborted"):
+                        yield from node.abort_tx(node.transport.get_extra_info('sockname'), node.identifier, tx)  # send abort to itslef(sender)
+                else:
+                    print("Phase 1 Complete. Entering Phase two")
+                    """ Phase 2 """
                 # do the work of sender
+
             elif tx.receiver == node.identifier:
                 print("I am receiver")
                 # do the work of receiver
@@ -66,6 +82,7 @@ def handle_trans(node):
                 print("I am witness")
                 # do the work of witnes
         yield from asyncio.sleep(1)
+
 
 def start_a_node(sock_addr, bootstrap_addr=None):
 
