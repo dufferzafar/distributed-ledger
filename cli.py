@@ -10,6 +10,7 @@ from node import Node
 # https://stackoverflow.com/questions/37866403
 from aioconsole import ainput
 from cli_utils import get_sock_from_name
+from start_node import handle_trans
 
 
 async def cli(node):
@@ -84,6 +85,9 @@ async def cli(node):
 
         elif cmd == 'help':
             print("Haven't implemented yet")
+
+        elif cmd == 'broadcast':
+            x = await node.request(("255.255.255.255", 9000), "ping", node.identifier)
 
         else:
             print("Please enter valid input.\nType help to see commands")

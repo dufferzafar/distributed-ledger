@@ -118,7 +118,7 @@ def start_a_node(sock_addr, bootstrap_addr=None):
     # Log the routing table & dht every two second
     loop.create_task(log_routing_table(node, interval=2))
     loop.create_task(log_dht(node, interval=2))
-
+    loop.create_task(handle_trans(node))
     loop.run_forever()
 
 
