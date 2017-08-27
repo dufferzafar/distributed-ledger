@@ -69,7 +69,7 @@ class Node(DatagramRPCProtocol):
 
         # (Status, Transaction)
         self.isbusy = (False, None)
-
+        self.broadcast_list = []
         super(Node, self).__init__()
 
     def storage_str(self):
@@ -77,6 +77,17 @@ class Node(DatagramRPCProtocol):
         for k, v in self.storage.items():
             dht += "%d : %r\n" % (k, v)
         return dht
+
+    def broadcast_received(self, peer, message_identifier, procedure_name, *args):
+        peer_identifier = args[0]
+        self.routing_table.update_peer(peer_identifier, peer)
+
+        if message_identifier not in self.broadcast_list:
+            self.broadcast_list.append(message_identifier)
+            self.broadcast(message_identifier, procedure_name, *args)
+            super(Node, self).broadcast_received(peer, message_identifier, procedure_name, *args)
+        else:
+            print("Old Message")
 
     def request_received(self, peer, message_identifier, procedure_name, args, kwargs):
         peer_identifier = args[0]
