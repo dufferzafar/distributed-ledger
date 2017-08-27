@@ -72,8 +72,7 @@ class Node(DatagramRPCProtocol):
 
         super(Node, self).__init__()
 
-    # TODO: This method should ideally be called dht()
-    def __str__(self):
+    def storage_str(self):
         dht = ""
         for k, v in self.storage.items():
             dht += "%d : %r\n" % (k, v)

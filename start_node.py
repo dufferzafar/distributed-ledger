@@ -38,7 +38,7 @@ def continuous_ping(node, to, interval=5):
 def log_routing_table(node, interval=5):
     while True:
         logger = logging.getLogger('node')
-        logger.info("Routing Table\n" + str(node.routing_table))
+        logger.info("My Routing Table:\n" + str(node.routing_table))
         yield from asyncio.sleep(interval)
 
 
@@ -46,7 +46,7 @@ def log_routing_table(node, interval=5):
 def log_dht(node, interval=5):
     while True:
         logger = logging.getLogger('node')
-        logger.info("DHT\n" + str(node))
+        logger.info("My Hash Table:\n" + node.storage_str())
         yield from asyncio.sleep(interval)
 
 
