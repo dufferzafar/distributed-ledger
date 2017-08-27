@@ -87,8 +87,10 @@ def handle_trans(node):
 def start_a_node(sock_addr, bootstrap_addr=None):
 
     loop = asyncio.get_event_loop()
-    # on receiving SIGINT Ctrl+C it will try to stop the loop
+
+    # On receiving SIGINT Ctrl+C - try to stop the loop
     loop.add_signal_handler(signal.SIGINT, loop.stop)
+
     f = loop.create_datagram_endpoint(Node, local_addr=sock_addr)
     _, node = loop.run_until_complete(f)
 
@@ -99,13 +101,9 @@ def start_a_node(sock_addr, bootstrap_addr=None):
 
     # For nodes that are not bootstrapper
     if bootstrap_addr:
-        # When a new node is created, it pings the bootstrapper
-        loop.run_until_complete(node.ping(bootstrap_addr, node.identifier))
+        loop.run_until_complete(node.join(known_node=bootstrap_addr))
 
-        # and then follows kademlia join protocol
-        loop.run_until_complete(node.join())
-
-    # Log the routing table every two second
+    # Log the routing table & dht every two second
     loop.create_task(log_routing_table(node, interval=2))
     loop.create_task(log_dht(node, interval=2))
 

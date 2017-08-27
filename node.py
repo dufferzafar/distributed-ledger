@@ -47,6 +47,9 @@ class Node(DatagramRPCProtocol):
 
     def __init__(self, alpha=3, k=20, identifier=None):
 
+        # Generate public private key pair
+        self.pub_key, self.pvt_key = gen_pub_pvt()
+
         # TODO: Make the node id a function of node's public key
         # Just like Bitcoin wallet IDs use HASH160
         if identifier is None:
@@ -54,14 +57,15 @@ class Node(DatagramRPCProtocol):
 
         self.identifier = identifier
 
-        self.routing_table = RoutingTable(self.identifier, k=k)
-
         # Constants from the kademlia protocol
         self.k = k
         self.alpha = alpha
 
         # Each node has their own dictionary
         self.storage = {}
+
+        # The k-bucket based kademlia routing table
+        self.routing_table = RoutingTable(self.identifier, k=k)
 
         # (Status, Transaction)
         self.isbusy = (False, None)
@@ -266,19 +270,31 @@ class Node(DatagramRPCProtocol):
             yield from self.ping(peer, self.identifier)
 
     @asyncio.coroutine
-    def join(self):
-        # http://xlattice.sourceforge.net/components/protocol/kademlia/specs.html#join
+    def join(self, known_node):
+        """
+        Run by a node when it wants to join the network.
+
+        http://xlattice.sourceforge.net/components/protocol/kademlia/specs.html#join
+        """
+
+        # When a new node is created, ping some known_node
+        yield from self.ping(known_node, self.identifier)
+
+        # Try to find all peers close to myself
+        # (this'll update my routing table)
         yield from self.lookup_node(self.identifier)
+
+        # Pinging all neighbors will update their routing tables
         yield from self.ping_all_neighbors()
 
         try:
+            # Check if my public key is already in the network
             yield from self.get(self.identifier)
-            # search if my public key already in network
-        except KeyError:  # key not found
-            # TODO: This should ideally be in __init__
-            pub_key, pvt_key = gen_pub_pvt()
-            # generate public private key pair
-            self.pvt_key = pvt_key
-            my_sock_addr = self.transport.get_extra_info('sockname')
-            # function to get my own socket
-            yield from self.put(self.identifier, (my_sock_addr, pub_key))
+        except KeyError:
+
+            # The socket I'm listening on
+            self.socket_addr = self.transport.get_extra_info('sockname')
+
+            # Store my information onto the network
+            # (allowing others to find me)
+            yield from self.put(self.identifier, (self.socket_addr, self.pub_key))
