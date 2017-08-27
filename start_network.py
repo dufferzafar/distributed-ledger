@@ -36,7 +36,7 @@ def cleanup(remove_logs=False):
 def xterm_cmd(ip, port, b_ip=None, b_port=None):
 
     if b_ip:
-        title = "Host_%d: " % (port - b_port)
+        title = "Host_%d: "
         file = "start_node.py"
         args = "%s %d %s %d" % (ip, port, b_ip, b_port)
     else:
@@ -84,7 +84,7 @@ def start_network(nodes=3):
             b_port=config.PORT
         )
 
-        host.cmd(c)
+        host.cmd(c % (i+1))
 
 
 class MininetREPL(REPL):
