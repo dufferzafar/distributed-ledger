@@ -11,8 +11,6 @@ import config
 from mininet.net import Mininet
 from mininet.topo import LinearTopo
 
-BOOT_PORT = 9000
-
 # The global mininet object
 # Created by start_network
 # Used by start_control_server
@@ -56,20 +54,24 @@ def xterm_cmd(ip, port, b_ip=None, b_port=None):
 def start_network(nodes=3):
     global NET
 
-    NET = Mininet(LinearTopo(k=1, n=nodes))
-    hosts = NET.hosts
+    NET = Mininet(
+        topo=LinearTopo(k=1, n=nodes),
+        ipBase=config.IP
+    )
 
     # Start the network
     NET.start()
 
     # The first node acts as a bootstrapper for other
     c = xterm_cmd(
-        ip=hosts[0].IP(),
-        port=BOOT_PORT)
-    hosts[0].cmd(c)
+        ip=NET.hosts[0].IP(),
+        port=config.PORT
+    )
+
+    NET.hosts[0].cmd(c)
 
     # Other nodes
-    for i, host in enumerate(hosts[1:]):
+    for i, host in enumerate(NET.hosts[1:]):
         # Ensure that each consecutive node is spawned with a slight delay
         # so that no two nodes fight for single actual port (127.0.0.1:port)
         # Every node 10.0.0.*:port is mapped to some 127.0.0.1:port by mininet
@@ -77,10 +79,11 @@ def start_network(nodes=3):
 
         c = xterm_cmd(
             ip=host.IP(),
-            port=BOOT_PORT + i + 1,
-            b_ip=hosts[0].IP(),
-            b_port=BOOT_PORT
+            port=config.PORT,
+            b_ip=NET.hosts[0].IP(),
+            b_port=config.PORT
         )
+
         host.cmd(c)
 
 
