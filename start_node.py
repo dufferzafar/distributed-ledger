@@ -49,6 +49,23 @@ def log_dht(node, interval=5):
         yield from asyncio.sleep(interval)
 
 
+@asyncio.coroutine
+def handle_trans(node):
+    while True:
+        if(node.isbusy[0]):  # if involved in some transaction
+            tx = node.isbusy[1]  # get that transaction
+
+            if tx.sender == node.identifier:
+                print("I am sender")
+                # do the work of sender
+            elif tx.receiver == node.identifier:
+                print("I am receiver")
+                # do the work of receiver
+            elif tx.witness == node.identifier:
+                print("I am witness")
+                # do the work of witnes
+        yield from asyncio.sleep(1)
+
 def start_a_node(sock_addr, bootstrap_addr=None):
 
     loop = asyncio.get_event_loop()
