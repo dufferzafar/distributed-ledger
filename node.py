@@ -147,12 +147,26 @@ class Node(DatagramRPCProtocol):
 
     # TODO Implement become_witness and become_receiver function
     @remote
-    def become_receiver(self, sender):
-        return (self.identifier, "busy")
+    def become_receiver(self, sender_sock, sender_id, tx):
+        if self.isbusy[0] and self.isbusy[1] != tx:  # check if node busy in other trans
+            return (self.identifier, "busy")  # return busy
+        else:
+            # perform validation of the transaction
+            # do other checks if needed
+            # if everything is fine
+            self.isbusy = (True, tx)  # set node busy in tx
+            return (self.identifier, "yes")  # return yes
 
     @remote
-    def become_witness(self, sender):
-        return (slef.identifier, "yes")
+    def become_witness(self, sender_sock, sender_id, tx):
+        if self.isbusy[0] and self.isbusy[1] != tx:  # check if node busy in other trans
+            return (self.identifier, "busy")  # return busy
+        else:
+            # perform validation of the transaction
+            # do other checks if needed
+            # if everything is fine
+            self.isbusy = (True, tx)  # set node busy in tx
+            return (self.identifier, "yes")  # return yes
 
     # TODO: Refactor the hashed part
     @asyncio.coroutine
