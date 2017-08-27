@@ -6,6 +6,7 @@ import signal
 import config
 
 from node import Node
+from trans import Transaction
 
 
 def setup_logging(node_id):

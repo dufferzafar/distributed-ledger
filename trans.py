@@ -11,5 +11,8 @@ class Transaction:
         self.receiver = receiver
         self.witness = witness
 
+    def __eq__(self, other):
+        return self.id == other.id  # no need to compare other attributes id must be unique
+
     def __repr__(self):
         return repr(self.id)

@@ -55,12 +55,12 @@ async def cli(node):
 
             if (len(args) != 1):
                 print("Expected 1 argument, %d given" % len(args))
-
-            try:
-                value = await node.get(args[0], hashed=False)
-                print(value)
-            except KeyError:
-                print("Key not found")
+            else:
+                try:
+                    value = await node.get(args[0], hashed=False)
+                    print(value)
+                except KeyError:
+                    print("Key not found")
 
         elif cmd == 'send_bitcoins':
 
