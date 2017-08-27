@@ -149,13 +149,12 @@ class Node(DatagramRPCProtocol):
 
         return (self.identifier, response)
 
-    # TODO Implement become_witness and become_receiver function
     @remote
     def become_receiver(self, peer_sock, peer_id, tx):
         if self.isbusy[0] and self.isbusy[1] != tx:  # check if node busy in other trans
             return (self.identifier, "busy")  # return busy
         else:
-            # perform validation of the transaction
+            # TODO perform validation of the transaction
             # do other checks if needed
             # if everything is fine
             self.isbusy = (True, tx)  # set node busy in tx
@@ -166,18 +165,30 @@ class Node(DatagramRPCProtocol):
         if self.isbusy[0] and self.isbusy[1] != tx:  # check if node busy in other trans
             return (self.identifier, "busy")  # return busy
         else:
-            # perform validation of the transaction
+            # TODO perform validation of the transaction
             # do other checks if needed
             # if everything is fine
             self.isbusy = (True, tx)  # set node busy in tx
             return (self.identifier, "yes")  # return yes
 
     @remote
+    def commit_tx(self, peer, peer_id, tx, *args):
+        # TODO add code regarding broadcast
+        if(self.identifier in [tx.sender, tx.receiver, tx.witness]):
+            # TODO add transactoin to ledgger
+            # if successfull return commit else reutrn false
+            print("Commit Successfull!")
+            return (self.identifier, "committed")
+
+    @remote
     def abort_tx(self, peer, peer_id, tx):
-        # remove transaction from ledger if already added
-        self.isbusy = (False, None)
-        print("Transction aborted")
-        return (self.identifier, "aborted")
+        # TODO remove transaction from ledger if already added
+        if self.isbusy[0] and self.isbusy[1] == tx:
+            self.isbusy = (False, None)
+            print("Transction aborted")
+            return (self.identifier, "aborted")
+
+        return (self.identifier, "Not involved in this transaction")
 
     # TODO: Refactor the hashed part
     @asyncio.coroutine
