@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import traceback
 
 from cmd import Cmd as REPL
 
@@ -116,5 +117,10 @@ if __name__ == '__main__':
 
         MininetREPL().cmdloop()
 
-    except KeyboardInterrupt:
+    except:
+
+        # Helps in debugging
+        traceback.print_exc()
+        traceback.print_stack()
+
         cleanup()
