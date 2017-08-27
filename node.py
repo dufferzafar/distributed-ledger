@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import socket
+import pickle
 
 from functools import wraps
 
@@ -199,6 +200,16 @@ class Node(DatagramRPCProtocol):
             return (self.identifier, "aborted")
 
         return (self.identifier, "Not involved in this transaction")
+
+    def broadcast(self, message_identifier, procedure_name, *args, **kwargs):
+
+        logger.info("received a broadcast for procedure %r as message %r", procedure_name, message_identifier)
+
+        obj = ('broadcast', message_identifier, procedure_name, *args)
+        message = pickle.dumps(obj, protocol=0)
+
+        for _, peer in self.routing_table:
+            self.transport.sendto(message, peer)
 
     # TODO: Refactor the hashed part
     @asyncio.coroutine
