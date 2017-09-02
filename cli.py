@@ -4,13 +4,14 @@ import sys
 import shlex
 import socket
 
-from node import Node
-
 # TODO: Is cmd module made async a better alternative?
 # https://pymotw.com/2/cmd/index.html#module-cmd
 # https://stackoverflow.com/questions/37866403
 from aioconsole import ainput
+
+from node import Node
 from start_node import handle_trans
+
 from utils import random_id, sha1_int
 from cli_utils import get_sock_from_name, generate_help_dict
 
@@ -48,20 +49,29 @@ async def cli(node):
             else:
                 print("My id is %d" % node.identifier)
 
+        # TODO: Print hash table of a particular node
         elif cmd in ['ht', 'hash_table']:
+            "Print my hash table"
+
             print(node.storage_str())
 
+        # TODO: Print routing table of a particular node
         elif cmd in ['rt', 'routing_table']:
+            "Print my routing table"
+
             print(node.routing_table)
 
         elif cmd in ['put']:
+            "Store a (key, value) pair on the network DHT"
+
             if (len(args) != 2):
                 print("Expected 2 arguments, %d given" % len(args))
             else:
                 num = await node.put(args[0], args[1], hashed=False)
-                print("Value stored at %d node(s)." % num)
+                print("Value stored at %d node(s)" % num)
 
         elif cmd in ['get']:
+            "Access a previously stored value by its key"
 
             if (len(args) != 1):
                 print("Expected 1 argument, %d given" % len(args))
@@ -73,6 +83,7 @@ async def cli(node):
                     print("Key not found")
 
         elif cmd in ['send_bitcoins']:
+            "Send bitcoins to a node"
 
             if (len(args) != 4):
                 print("Expected 4 arguments, %d given" % len(args))
@@ -93,10 +104,14 @@ async def cli(node):
                     print("Exception Caught : ", e)
 
         elif cmd in ['help', '?']:
+            "List commands"
+
             # Find left-justification factor
             ljust = max(map(len, HELP_DICT.keys()))
             for cmd, doc in HELP_DICT.items():
                 print(cmd.ljust(ljust) + " : " + doc)
+
+            print()
 
         elif cmd in ['broadcast']:
             node.broadcast(random_id(), 'store', node.identifier, sha1_int("harish"), "chandra")
