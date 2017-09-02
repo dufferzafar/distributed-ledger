@@ -76,8 +76,8 @@ async def cli(node):
                     receiver_sock = get_sock_from_name(args[1])
                     witness_sock = get_sock_from_name(args[2])
 
-                    receiver_id = await node.request(receiver_sock, 'ping', node.identifier)
-                    witness_id = await node.request(witness_sock, 'ping', node.identifier)
+                    receiver_id = await node.ping(receiver_sock, node.identifier)
+                    witness_id = await node.ping(witness_sock, node.identifier)
                     amount = int(args[3])
 
                     reply = await node.request(sender_sock, "send_bitcoins", node.identifier, int(receiver_id), int(witness_id), amount)
