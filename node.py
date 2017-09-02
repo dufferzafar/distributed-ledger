@@ -215,26 +215,29 @@ class Node(DatagramRPCProtocol):
 
         return (self.identifier, "Not involved in this transaction")
 
-    """
-    Broadcast - Broadcasts a message containing a procedure_name to all the nodes
-    who execute it
-  
-    Arguments:
-        message_identifier : unique msg id for each broadcast
-        procedure_name : name of the remote procedure to be executed
-        args : parameters for that procedure
-    """
     @asyncio.coroutine
     def broadcast(self, message_identifier, procedure_name, *args, **kwargs):
+        """
+        Broadcast a message containing a procedure_name to all the nodes
+        who will then execute it.
+
+        Arguments:
+            message_identifier : unique msg id for each broadcast
+            procedure_name : name of the remote procedure to be executed
+            args : parameters for that procedure
+        """
 
         logger.info("received a broadcast for procedure %r as message %r", procedure_name, message_identifier)
-        if message_identifier not in self.broadcast_list:  # if message identifier is not in list
+        if message_identifier not in self.broadcast_list:
             self.broadcast_list.append(message_identifier)
-        obj = ('broadcast', message_identifier, procedure_name, *args)  # creating an mesage object with msgtype, procedure_name and its args
+
+        # Create a mesage with its type, procedure_name and args
+        obj = ('broadcast', message_identifier, procedure_name, *args)
         message = pickle.dumps(obj, protocol=0)
 
+        # Send the msg to each connected peer
         for _, peer in self.routing_table:
-            self.transport.sendto(message, peer)  # sending the broadcast msg to each connected peer
+            self.transport.sendto(message, peer)
 
     # TODO: Refactor the hashed part
     @asyncio.coroutine
@@ -355,7 +358,7 @@ class Node(DatagramRPCProtocol):
             # Store my information onto the network
             # (allowing others to find me)
             yield from self.put(self.identifier, (self.socket_addr, self.pub_key))
-        
+
             my_genesis_tx = self.ledger.ledger[0]  # my genesis transaction
             yield from self.add_tx_to_ledger(known_node, self.identifier, my_genesis_tx)  # add it to the ledger of bootstrapper
 
