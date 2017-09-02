@@ -53,7 +53,8 @@ async def cli(node):
             if (len(args) != 2):
                 print("Expected 2 arguments, %d given" % len(args))
             else:
-                await node.put(args[0], args[1], hashed=False)
+                num = await node.put(args[0], args[1], hashed=False)
+                print("Value stored at %d node(s)." % num)
 
         elif cmd == 'get':
 
