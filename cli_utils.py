@@ -43,14 +43,14 @@ def generate_help_dict():
 
             # The longest command is main - others are its aliases
             cmd = sorted(cmd_aliases, key=len)[-1]
-            doctring = ""
+            docstring = ""
 
-            # Extract the doctring (if there is one)
+            # Extract the docstring (if there is one)
             if_child = node.body[0]
             if hasattr(if_child, 'value') and isinstance(if_child.value, ast.Str):
-                doctring = if_child.value.s
+                docstring = if_child.value.s
 
             # Add it to our dict
-            commands[cmd] = doctring
+            commands[cmd] = docstring
 
     return commands
