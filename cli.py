@@ -35,15 +35,18 @@ async def cli(node):
         args = line[1:]
 
         if cmd in ['id']:
+            "Print id of a node"
+
             if len(args) == 1:
+                peer_name = args[0]
                 peer_socket = get_sock_from_name(args[0])
                 try:
                     peer_id = await node.ping(peer_socket, node.identifier)
-                    print(peer_id)
+                    print("%s's id is %d" % (peer_name, peer_id))
                 except socket.timeout:
                     print("Failed to ping node %s" % args[0])
             else:
-                print(node.identifier)
+                print("My id is %d" % node.identifier)
 
         elif cmd in ['ht', 'hash_table']:
             print(node.storage_str())
