@@ -16,7 +16,9 @@ class Ledger(object):
 
     def add_trans(self, tx):
         self.ledger.append(tx)
-        self.ledger.sort(key=lambda tx: tx.tx_id)
+        if tx not in self.ledger:
+            self.ledger.append(tx)
+            self.ledger.sort(key=lambda tx: tx.tx_id)
 
     def verify_trans(self, tx):
         pass
