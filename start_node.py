@@ -3,11 +3,13 @@ import logging
 import os
 import sys
 import signal
+
 import config
 
 from node import Node
 from trans import Transaction
 from utils import random_id
+
 
 def setup_logging(node_id):
 
@@ -15,11 +17,11 @@ def setup_logging(node_id):
         os.mkdir(config.LOG_DIR)
 
     kademlia_logger = logging.getLogger('node')
-    kademlia_logger.setLevel(logging.DEBUG)
+    kademlia_logger.setLevel(config.LOGLEVEL)
 
     stream_handler = logging.StreamHandler()
     # stream_handler = logging.FileHandler('logs/%d.log' % node_id, "w")
-    stream_handler.setLevel(logging.DEBUG)
+    stream_handler.setLevel(config.LOGLEVEL)
 
     format_ = logging.Formatter('\n%(asctime)s - %(message)s\n')
     stream_handler.setFormatter(format_)
@@ -38,7 +40,7 @@ def continuous_ping(node, to, interval=5):
 def log_routing_table(node, interval=5):
     while True:
         logger = logging.getLogger('node')
-        logger.info("My Routing Table:\n" + str(node.routing_table))
+        logger.debug("My Routing Table:\n" + str(node.routing_table))
         yield from asyncio.sleep(interval)
 
 
@@ -46,7 +48,7 @@ def log_routing_table(node, interval=5):
 def log_dht(node, interval=5):
     while True:
         logger = logging.getLogger('node')
-        logger.info("My Hash Table:\n" + node.storage_str())
+        logger.debug("My Hash Table:\n" + node.storage_str())
         yield from asyncio.sleep(interval)
 
 
