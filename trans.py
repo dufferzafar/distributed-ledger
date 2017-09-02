@@ -36,7 +36,7 @@ class Transaction(object):
 
     def __init__(self, sender, receiver, witness, amount, input_tx=None):
 
-        self.tx_id = time.time()  # transaction id is time(for virtual synchrony)
+        self.tx_id = time.time() * (10**9)  # transaction id is time(for virtual synchrony) multiplying 10^9 it to get time in nanoseconds
         self.input_tx = input_tx  # input transactions, None for Genesis
         self.sender = sender
         self.receiver = receiver
@@ -48,7 +48,7 @@ class Transaction(object):
         return self.tx_id == other.tx_id  # no need to compare other attributes id must be unique
 
     def __repr__(self):
-        return "%r %r %r" % (repr(self.tx_id), repr(self.sender), repr(self.receiver))
+        return "%r %r %r" % (repr(int(self.tx_id)), repr(self.sender), repr(self.receiver))
 
 
 if __name__ == '__main__':
