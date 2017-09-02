@@ -222,7 +222,8 @@ class Node(DatagramRPCProtocol):
     def broadcast(self, message_identifier, procedure_name, *args, **kwargs):
 
         logger.info("received a broadcast for procedure %r as message %r", procedure_name, message_identifier)
-
+        if message_identifier not in self.broadcast_list:  # if message identifier is not in list
+            self.broadcast_list.append(message_identifier)
         obj = ('broadcast', message_identifier, procedure_name, *args)  # creating an mesage object with msgtype, procedure_name and its args
         message = pickle.dumps(obj, protocol=0)
 
