@@ -14,8 +14,7 @@ class Ledger(object):
         self.node_id = node_id  # belong to which node
         self.ledger = [Transaction(None, node_id, None, 100, None)]  # Genesis Transaction
 
-    def add_trans(self, tx):
-        self.ledger.append(tx)
+    def add_tx(self, tx):
         if tx not in self.ledger:
             self.ledger.append(tx)
             self.ledger.sort(key=lambda tx: tx.tx_id)
