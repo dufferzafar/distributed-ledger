@@ -147,6 +147,9 @@ if __name__ == '__main__':
 
         MininetREPL().cmdloop()
 
+    except SystemExit:
+        pass
+
     except:
 
         # Helps in debugging
