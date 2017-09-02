@@ -10,9 +10,11 @@ from node import Node
 # https://pymotw.com/2/cmd/index.html#module-cmd
 # https://stackoverflow.com/questions/37866403
 from aioconsole import ainput
-from cli_utils import get_sock_from_name
 from start_node import handle_trans
 from utils import random_id, sha1_int
+from cli_utils import get_sock_from_name, generate_help_dict
+
+HELP_DICT = generate_help_dict()
 
 async def cli(node):
 
@@ -87,8 +89,8 @@ async def cli(node):
                 except Exception as e:
                     print("Exception Caught : ", e)
 
-        elif cmd in ['help']:
-            print("Haven't implemented yet")
+        elif cmd in ['help', '?']:
+            print(HELP_DICT)
 
         elif cmd in ['broadcast']:
             node.broadcast(random_id(), 'store', node.identifier, sha1_int("harish"), "chandra")
