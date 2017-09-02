@@ -81,7 +81,7 @@ class Node(DatagramRPCProtocol):
         return dht
 
     def broadcast_received(self, peer, message_identifier, procedure_name, *args):
-        peer_identifier = args[0]  
+        peer_identifier = args[0]
         self.routing_table.update_peer(peer_identifier, peer)  # update the routing table
 
         if message_identifier not in self.broadcast_list:  # if message identifier is not in list
@@ -149,7 +149,7 @@ class Node(DatagramRPCProtocol):
         # TODO Generate a transaction based on amount
 
         gen_status = True  # call gen transaction
-        tx = Transaction(self.identifier, receiver_id, witness_id)  # denotes the generated transaction
+        tx = Transaction(self.identifier, receiver_id, witness_id, amount)  # denotes the generated transaction
 
         if not gen_status:
             response = "Not enough balance"
@@ -187,11 +187,12 @@ class Node(DatagramRPCProtocol):
     def commit_tx(self, peer, peer_id, tx, *args):
         # TODO add code regarding broadcast
         if(self.identifier in [tx.sender, tx.receiver, tx.witness]):
-            # TODO add transactoin to ledgger
-            # if successfull return commit else reutrn false
-            print("Commit Successfull!")
             self.isbusy = (False, None)  # Now node is free
-            return (self.identifier, "committed")
+
+        print("Commit Successfull!")
+        # TODO add transactoin to ledgger
+        # if successfull return commit else reutrn false
+        return (self.identifier, "committed")
 
     @remote
     def abort_tx(self, peer, peer_id, tx):
