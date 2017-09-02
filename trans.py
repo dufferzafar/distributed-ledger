@@ -12,7 +12,7 @@ class Ledger(object):
 
     def __init__(self, node_id):
         self.node_id = node_id  # belong to which node
-        self.ledger = [Transaction(None, node_id, None, None, 100)]  # Genesis Transaction
+        self.ledger = [Transaction(None, node_id, None, 100, None)]  # Genesis Transaction
 
     def add_trans(self, tx):
         self.ledger.append(tx)
@@ -48,7 +48,7 @@ class Transaction(object):
         return self.tx_id == other.tx_id  # no need to compare other attributes id must be unique
 
     def __repr__(self):
-        return "%r %r %r" % (repr(int(self.tx_id)), repr(self.sender), repr(self.receiver))
+        return "%r %r %r %r" % (repr(int(self.tx_id)), repr(self.sender), repr(self.receiver), repr(self.amount))
 
 
 if __name__ == '__main__':
