@@ -185,6 +185,12 @@ class Node(DatagramRPCProtocol):
             return (self.identifier, "yes")  # return yes
 
     @remote
+    def add_tx(self, peer, peer_id, tx):
+        logger.info("Adding Transaction %d to the ledger", tx.tx_id)
+        self.ledger.add_tx(tx)
+        return (self.identifier, "Transaction added")
+
+    @remote
     def commit_tx(self, peer, peer_id, tx, *args):
         # TODO add code regarding broadcast
         if(self.identifier in [tx.sender, tx.receiver, tx.witness]):
