@@ -2,6 +2,7 @@ import asyncio
 import signal
 import sys
 import shlex
+import socket
 
 from node import Node
 
@@ -34,8 +35,11 @@ async def cli(node):
         if cmd == 'id':
             if len(args) == 1:
                 peer_socket = get_sock_from_name(args[0])
-                peer_id = await node.ping(peer_socket, node.identifier)
-                print(peer_id)
+                try:
+                    peer_id = await node.ping(peer_socket, node.identifier)
+                    print(peer_id)
+                except socket.timeout:
+                    print("Failed to ping node %s" % args[0])
             else:
                 print(node.identifier)
 
