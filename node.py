@@ -220,6 +220,7 @@ class Node(DatagramRPCProtocol):
         procedure_name : name of the remote procedure to be executed
         args : parameters for that procedure
     """
+    @asyncio.coroutine
     def broadcast(self, message_identifier, procedure_name, *args, **kwargs):
 
         logger.info("received a broadcast for procedure %r as message %r", procedure_name, message_identifier)

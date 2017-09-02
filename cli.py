@@ -114,7 +114,7 @@ async def cli(node):
             print()
 
         elif cmd in ['broadcast']:
-            node.broadcast(random_id(), 'store', node.identifier, sha1_int("harish"), "chandra")
+            await node.broadcast(random_id(), 'store', node.identifier, sha1_int("harish"), "chandra")
             # node.broadcast(random_id(), 'ping', node.identifier)
 
         else:

@@ -91,7 +91,7 @@ def handle_trans(node):
                     if (witness_commit == "committed" and receiver_commit == "committed"):
                         logger.info("Phase 2 Complete")
                         yield from node.commit_tx(node.transport.get_extra_info('sockname'), node.identifier, tx)  # Commit transaction
-                        node.broadcast(random_id(), 'commit_tx', node.identifier, tx)
+                        yield from node.broadcast(random_id(), 'commit_tx', node.identifier, tx)
                         node.isbusy = (False, None)
                     
                     else:
