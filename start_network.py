@@ -113,6 +113,7 @@ class MininetREPL(REPL):
         new_switch = NET.addSwitch('s%d' % host_num)
         new_host = NET.addHost("h%d" % host_num)
 
+        # TODO: Fix bug that doesn't allow adding nodes starting from 1
         Link(new_host, new_switch)
         slink = Link(end_switch, new_switch)
 
@@ -153,6 +154,7 @@ if __name__ == '__main__':
     except:
 
         # Helps in debugging
+        # TODO: Comment these later
         traceback.print_exc()
         traceback.print_stack()
 
