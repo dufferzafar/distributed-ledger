@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os
+import re
 import sys
 import time
 import traceback
@@ -95,10 +96,10 @@ class MininetREPL(REPL):
     intro = "Control the bitcoin simulation network. Type help or ? to list commands.\n"
     prompt = ">>> "
 
-    def do_EOF(self, arg):
+    def do_EOF(self, line):
         self.do_stop_network(None)
 
-    def do_stop_network(self, arg):
+    def do_stop_network(self, line):
         """Stop network, close xterms, and exit."""
 
         print('Quitting now.')
@@ -107,7 +108,7 @@ class MininetREPL(REPL):
         cleanup()
         exit()
 
-    def do_add_node(self, arg):
+    def do_add_node(self, line):
         """Spawn a new node."""
 
         host_num = len(NET.hosts) + 1
@@ -137,7 +138,31 @@ class MininetREPL(REPL):
 
         print("Started new node: %s" % new_host)
 
-    def do_mn_cli(self, arg):
+    def do_disconnect_node(self, line):
+        """Disconnect a node from the network."""
+        args = line.split()
+        if (len(args) != 1):
+            print("Expected 1 argument, %d given" % len(args))
+        else:
+            host_name = args[0].strip()
+            host_num = int(re.findall(r'\d+', host_name)[0])
+
+            NET.configLinkStatus(host_name, "s%d" % host_num, "down")
+            print("Disconnected %s from the network" % host_name)
+
+    def do_reconnect_node(self, line):
+        """Re-connect a node to the network."""
+        args = line.split()
+        if (len(args) != 1):
+            print("Expected 1 argument, %d given" % len(args))
+        else:
+            host_name = args[0].strip()
+            host_num = int(re.findall(r'\d+', host_name)[0])
+
+            NET.configLinkStatus(host_name, "s%d" % host_num, "up")
+            print("Re-connected %s to the network" % host_name)
+
+    def do_mn_cli(self, line):
         """Run mininet CLI."""
 
         CLI(NET)
