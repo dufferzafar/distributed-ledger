@@ -1,7 +1,7 @@
 import asyncio
-import re
 import signal
 import sys
+import shlex
 
 from node import Node
 
@@ -11,26 +11,25 @@ from node import Node
 from aioconsole import ainput
 from cli_utils import get_sock_from_name
 from start_node import handle_trans
-from utils import random_id,sha1_int
+from utils import random_id, sha1_int
 
 async def cli(node):
 
     while True:
 
-        cmd = await ainput(">>> ")
+        line = await ainput(">>> ")
 
         # Since it reads the "\n" when you press enter
-        cmd = cmd.strip()
+        line = line.strip()
 
-        if not cmd:
+        if not line:
             continue
 
-        # TODO: Use shlex for better parsing?
-        # https://pymotw.com/2/shlex/
+        # Handle arguments with spaces etc.
+        line = list(shlex.shlex(line))
 
-        # Listing all arguments (must be each double quotes)
-        args = re.findall(r'"([^"]*)"', cmd)
-        cmd = cmd.split()[0]
+        cmd = line[0]
+        args = line[1:]
 
         if cmd == 'id':
             if len(args) == 1:
