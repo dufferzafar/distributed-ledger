@@ -90,7 +90,10 @@ async def cli(node):
                     print("Exception Caught : ", e)
 
         elif cmd in ['help', '?']:
-            print(HELP_DICT)
+            # Find left-justification factor
+            ljust = max(map(len, HELP_DICT.keys()))
+            for cmd, doc in HELP_DICT.items():
+                print(cmd.ljust(ljust) + " : " + doc)
 
         elif cmd in ['broadcast']:
             node.broadcast(random_id(), 'store', node.identifier, sha1_int("harish"), "chandra")
