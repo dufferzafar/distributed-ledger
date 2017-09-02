@@ -29,7 +29,8 @@ def cleanup(remove_logs=False):
     os.system("killall -SIGKILL xterm")
 
     # Call standard mn cleanup
-    os.system("mn --clean")
+    print("Running standard mininet cleanup command.")
+    os.system("mn --clean > /dev/null 2>&1")
 
     if remove_logs:
         for f in os.listdir(config.LOG_DIR):
