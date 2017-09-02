@@ -44,7 +44,7 @@ def xterm_cmd(ip, port, b_ip=None, b_port=None):
         file = "start_node.py"
         args = "%s %d %s %d" % (ip, port, b_ip, b_port)
     else:
-        title = "Bootstrap CLI: "
+        title = "Host_%d - Bootstrap CLI: "
         file = "cli.py"
         args = "%s %d" % (ip, port)
 
@@ -59,7 +59,7 @@ def start_network(nodes=3):
     global NET
 
     NET = Mininet(
-        topo=LinearTopo(k=1, n=nodes),
+        topo=LinearTopo(k=nodes),
         ipBase=config.IP
     )
 
@@ -72,7 +72,7 @@ def start_network(nodes=3):
         port=config.PORT
     )
 
-    NET.hosts[0].cmd(c)
+    NET.hosts[0].cmd(c % 1)
 
     # Other nodes
     for i, host in enumerate(NET.hosts[1:]):
@@ -88,7 +88,7 @@ def start_network(nodes=3):
             b_port=config.PORT
         )
 
-        host.cmd(c % (i+1))
+        host.cmd(c % (i+2))
 
 
 class MininetREPL(REPL):
@@ -110,7 +110,7 @@ class MininetREPL(REPL):
     def do_add_node(self, arg):
         """Spawn a new node."""
 
-        host_num = len(NET.hosts)
+        host_num = len(NET.hosts) + 1
 
         end_switch = NET.switches[-1]
 

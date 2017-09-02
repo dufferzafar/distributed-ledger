@@ -14,7 +14,7 @@ def get_sock_from_name(name):
     num = int(num[0])
 
     # TODO: Use some python ip module to get ip based on config.IP
-    return (("10.0.0.%d" % (num + 1)), config.PORT)
+    return (("10.0.0.%d" % num), config.PORT)
 
 
 # NOTE: Ideally, we should be using a better REPL module (like cmd.Cmd)
