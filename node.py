@@ -163,23 +163,29 @@ class Node(DatagramRPCProtocol):
 
     @remote
     def become_receiver(self, peer_sock, peer_id, tx):
+        logger.info("Handling request to become receiver for the transaction %d", tx.tx_id)
         if self.isbusy[0] and self.isbusy[1] != tx:  # check if node busy in other trans
+            logger.info("Cannot become receiver already busy in other tranasction")
             return (self.identifier, "busy")  # return busy
         else:
             # TODO perform validation of the transaction
             # do other checks if needed
             # if everything is fine
+            logger.info("Became receiver for the transaction %d", tx.tx_id)
             self.isbusy = (True, tx)  # set node busy in tx
             return (self.identifier, "yes")  # return yes
 
     @remote
     def become_witness(self, peer_sock, peer_id, tx):
+        logger.info("Handling request to become receiver for the transaction %d", tx.tx_id)
         if self.isbusy[0] and self.isbusy[1] != tx:  # check if node busy in other trans
+            logger.info("Cannot become witness already busy in another tranasction")
             return (self.identifier, "busy")  # return busy
         else:
             # TODO perform validation of the transaction
             # do other checks if needed
             # if everything is fine
+            logger.info("Became witness for the transaction %d", tx.tx_id)
             self.isbusy = (True, tx)  # set node busy in tx
             return (self.identifier, "yes")  # return yes
 
@@ -189,7 +195,7 @@ class Node(DatagramRPCProtocol):
         if(self.identifier in [tx.sender, tx.receiver, tx.witness]):
             self.isbusy = (False, None)  # Now node is free
 
-        print("Commit Successfull!")
+        logger.info("Trasaction %d successfully committed", tx.tx_id)
         # TODO add transactoin to ledgger
         # if successfull return commit else reutrn false
         return (self.identifier, "committed")
@@ -199,7 +205,7 @@ class Node(DatagramRPCProtocol):
         # TODO remove transaction from ledger if already added
         if self.isbusy[0] and self.isbusy[1] == tx:
             self.isbusy = (False, None)
-            print("Transction aborted")
+            logger.info("Trasaction %d aborted!", tx.tx_id)
             return (self.identifier, "aborted")
 
         return (self.identifier, "Not involved in this transaction")
