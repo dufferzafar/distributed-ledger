@@ -94,6 +94,9 @@ class MininetREPL(REPL):
     intro = "Control the bitcoin simulation network. Type help or ? to list commands.\n"
     prompt = ">>> "
 
+    def do_EOF(self, arg):
+        self.do_stop_network(None)
+
     def do_stop_network(self, arg):
         """Stop network, close xterms, and exit."""
 
