@@ -40,6 +40,9 @@ def generate_help_dict():
             ):
 
             cmd_aliases = [Str.s for Str in node.test.comparators[0].elts]
+
+            # The longest command is main - others are its aliases
+            cmd = sorted(cmd_aliases, key=len)[-1]
             doctring = ""
 
             # Extract the doctring (if there is one)
@@ -48,6 +51,6 @@ def generate_help_dict():
                 doctring = if_child.value.s
 
             # Add it to our dict
-            commands[cmd_aliases[0]] = doctring
+            commands[cmd] = doctring
 
     return commands
