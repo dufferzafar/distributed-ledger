@@ -53,6 +53,14 @@ def log_dht(node, interval=5):
 
 
 @asyncio.coroutine
+def log_ledger(node, interval=5):
+    while True:
+        logger = logging.getLogger('node')
+        logger.info("My Ledger:\n" + repr(node.ledger))
+        yield from asyncio.sleep(interval)
+
+
+@asyncio.coroutine
 def handle_trans(node):
     logger = logging.getLogger('node')
     while True:
@@ -125,6 +133,7 @@ def start_a_node(sock_addr, bootstrap_addr=None):
     # Log the routing table & dht every two second
     loop.create_task(log_routing_table(node, interval=2))
     loop.create_task(log_dht(node, interval=2))
+    loop.create_task(log_ledger(node, interval=5))
     loop.create_task(handle_trans(node))
     loop.run_forever()
 

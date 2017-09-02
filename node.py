@@ -8,7 +8,7 @@ from functools import wraps
 from routing_table import RoutingTable
 from utils import sha1_int, random_id, gen_pub_pvt
 from datagram_rpc import DatagramRPCProtocol
-from trans import Transaction
+from trans import Transaction, Ledger
 
 logger = logging.getLogger(__name__)
 
@@ -39,12 +39,6 @@ def remote(func):
     return inner
 
 
-def idk(func):
-    func.remote_name = func.__name__
-    func.reply_function = func
-    return func
-
-
 class Node(DatagramRPCProtocol):
 
     def __init__(self, alpha=3, k=20, identifier=None):
@@ -72,6 +66,7 @@ class Node(DatagramRPCProtocol):
         # (Status, Transaction)
         self.isbusy = (False, None)
         self.broadcast_list = []
+        self.ledger = Ledger(self.identifier)
         super(Node, self).__init__()
 
     def storage_str(self):
