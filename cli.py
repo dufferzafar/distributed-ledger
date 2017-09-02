@@ -44,7 +44,7 @@ async def cli(node):
                 print(node.identifier)
 
         elif cmd == 'dht':
-            print(node)
+            print(node.storage_str())
 
         elif cmd == 'routing_table':
             print(node.routing_table)
