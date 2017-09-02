@@ -32,7 +32,7 @@ async def cli(node):
         cmd = line[0]
         args = line[1:]
 
-        if cmd == 'id':
+        if cmd in ['id']:
             if len(args) == 1:
                 peer_socket = get_sock_from_name(args[0])
                 try:
@@ -43,20 +43,20 @@ async def cli(node):
             else:
                 print(node.identifier)
 
-        elif cmd == 'dht':
+        elif cmd in ['ht', 'hash_table']:
             print(node.storage_str())
 
-        elif cmd == 'routing_table':
+        elif cmd in ['rt', 'routing_table']:
             print(node.routing_table)
 
-        elif cmd == 'put':
+        elif cmd in ['put']:
             if (len(args) != 2):
                 print("Expected 2 arguments, %d given" % len(args))
             else:
                 num = await node.put(args[0], args[1], hashed=False)
                 print("Value stored at %d node(s)." % num)
 
-        elif cmd == 'get':
+        elif cmd in ['get']:
 
             if (len(args) != 1):
                 print("Expected 1 argument, %d given" % len(args))
@@ -67,7 +67,7 @@ async def cli(node):
                 except KeyError:
                     print("Key not found")
 
-        elif cmd == 'send_bitcoins':
+        elif cmd in ['send_bitcoins']:
 
             if (len(args) != 4):
                 print("Expected 4 arguments, %d given" % len(args))
@@ -87,19 +87,15 @@ async def cli(node):
                 except Exception as e:
                     print("Exception Caught : ", e)
 
-        elif cmd == 'help':
+        elif cmd in ['help']:
             print("Haven't implemented yet")
 
-        elif cmd == 'broadcast':
+        elif cmd in ['broadcast']:
             node.broadcast(random_id(), 'store', node.identifier, sha1_int("harish"), "chandra")
             # node.broadcast(random_id(), 'ping', node.identifier)
 
         else:
             print("Please enter valid input.\nType help to see commands")
-
-        # TODO: Implement rest of the functions and help
-
-        # TODO: Handle socket exceptions
 
 
 def start_node_with_cli(sock_addr):
