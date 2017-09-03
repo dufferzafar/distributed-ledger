@@ -103,7 +103,7 @@ async def cli(node):
                 except Exception as e:
                     print("Exception Caught : ", e)
 
-        elif cmd in ['help', '?']:
+        elif cmd in ['?', 'help']:
             "List commands"
 
             # Find left-justification factor
@@ -113,10 +113,18 @@ async def cli(node):
 
             print()
 
-        elif cmd in ['broadcast']:
-            "Broadcast a procedure to everyone"
-            await node.broadcast(random_id(), args[0], node.identifier, *args[1:])
-            # node.broadcast(random_id(), 'ping', node.identifier)
+        elif cmd in ['bd', 'brd', 'bc', 'broadcast']:
+            "Broadcast an RPC over the network"
+
+            if (len(args) < 1):
+                print("Expected atleast 1 argument, %d given" % len(args))
+            else:
+                await node.broadcast(random_id(), args[0], node.identifier, *args[1:])
+
+        elif cmd in ['ld', 'ledger']:
+            "Pretty print the ledger."
+
+            print(node.ledger)
 
         else:
             print("Please enter valid input.\nType help to see commands")
