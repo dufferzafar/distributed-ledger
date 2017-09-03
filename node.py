@@ -136,15 +136,14 @@ class Node(DatagramRPCProtocol):
         return (self.identifier, response)
 
     @remote
-    def send_bitcoins(self, peer_sock, peer_id, receiver_id, witness_id, amount):  # after self, the first tw oarguments must always be the peer_sock, peer_id
-        # this node is the sender
-        # caller is the node that initiated this can be sender itself or cli.py
+    def send_bitcoins(self, peer_sock, peer_id, receiver_id, witness_id, amount):
+        # This node is the sender
+        # Caller is the node that initiated the call (can be sender itself or cli.py)
+
+        trans_ok, txs = self.ledger.gen_trans(self.identifier, receiver_id, witness_id, amount)
 
         response = ""
-
-        # TODO Generate a transaction based on amount
-        gen_status, txs = self.ledger.gen_trans(self.identifier, receiver_id, witness_id, amount)   # call gen transaction
-        if not gen_status:
+        if not trans_ok:
             response = "Not enough balance"
         elif self.isbusy[0]:
             response = "Node already busy in another tx %d" % (self.isbusy[1][0].id)
