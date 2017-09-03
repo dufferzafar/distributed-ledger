@@ -197,9 +197,12 @@ class Node(DatagramRPCProtocol):
         return (self.identifier, "Transaction added")
 
     @remote
-    def commit_tx(self, peer, peer_id, tx, *args):
-        # TODO add code regarding broadcast
-        if(self.identifier in [tx.sender, tx.receiver, tx.witness]):
+    def commit_tx(self, peer, peer_id, txs, *args):
+        history_tx = "new"  # transaction is new
+        if(txs[0] in self.ledger.record):
+            history_tx = "old"  # transaction already in ledger
+        if(len(txs) == 2 and txs[1] not in self.ledger.record and history_tx == "old"):
+            history_tx = "weird"  # incorrect transaction not possible
             self.isbusy = (False, None)  # Now node is free
 
         logger.info("Trasaction %d successfully committed", tx.tx_id)
