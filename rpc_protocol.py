@@ -46,6 +46,10 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
 
         self.outstanding_requests = {}
 
+        # A set of message_ids that I've broadcasted
+        # (required to stop infinite flooding)
+        self.broadcasted = set()
+
         super(DatagramRPCProtocol, self).__init__()
 
     def connection_made(self, transport):
@@ -59,8 +63,8 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
         msg_type, message_identifier, *details = pickle.loads(data)
 
         if msg_type == 'broadcast':
-            procedure_name, *args = details
-            self.broadcast_received(peer, message_identifier, procedure_name, *args)
+            procedure_name, args = details
+            self.broadcast_received(peer, message_identifier, procedure_name, args)
 
         elif msg_type == 'request':
             procedure_name, args, kwargs = details
@@ -70,11 +74,23 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
             response = details[0]
             self.reply_received(peer, message_identifier, response)
 
-    def broadcast_received(self, peer, message_identifier, procedure_name, *args):
+    def broadcast_received(self, peer, message_identifier, procedure_name, args):
         logger.info('received broadcast from %r: %r(*%r) as message %r',
                     peer, procedure_name, args, message_identifier)
-        reply_function = self.reply_functions[procedure_name]
-        reply_function(self, peer, *args)
+
+        # If this is a new message
+        if message_identifier not in self.broadcasted:
+            # BUG: This is also present in KademliaNode.broadcast
+            # self.broadcasted.add(message_identifier)
+
+            # Broadcast it to my neighbors - flooding!
+            self.broadcast(message_identifier, procedure_name, *args)
+
+            reply_function = self.reply_functions[procedure_name]
+            reply_function(self, peer, *args)
+        else:
+            # BUG: This should get printed atleast once (but doesn't?)
+            print("Old Message")
 
     def request_received(self, peer, message_identifier, procedure_name, args, kwargs):
         logger.info('received request from %r: %r(*%r, **%r) as message %r',

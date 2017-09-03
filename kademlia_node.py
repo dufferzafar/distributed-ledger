@@ -210,11 +210,11 @@ class KademliaNode(DatagramRPCProtocol):
         """
 
         logger.info("received a broadcast for procedure %r as message %r", procedure_name, message_identifier)
-        if message_identifier not in self.broadcast_list:
-            self.broadcast_list.append(message_identifier)
+        if message_identifier not in self.broadcasted:
+            self.broadcasted.add(message_identifier)
 
         # Create a mesage with its type, procedure_name and args
-        obj = ('broadcast', message_identifier, procedure_name, *args)
+        obj = ('broadcast', message_identifier, procedure_name, args)
         message = pickle.dumps(obj, protocol=0)
 
         # Send the msg to each connected peer
