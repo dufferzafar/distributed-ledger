@@ -41,7 +41,7 @@ def sign_msg(pvt_key, msg):
     pvt_key = binascii.unhexlify(pvt_key.encode())
     sk = ecdsa.SigningKey.from_string(pvt_key, curve=CURVE)
 
-    sign = sk.sign(msg)
+    sign = sk.sign(msg.encode())
     sign = binascii.hexlify(sign).decode()
 
     return sign
@@ -53,7 +53,7 @@ def verify_msg(pub_key, msg, sign):
 
     sign = binascii.unhexlify(sign.encode())
 
-    return vk.verify(sign, msg)
+    return vk.verify(sign, msg.encode())
 
 
 if __name__ == '__main__':
