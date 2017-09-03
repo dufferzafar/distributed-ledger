@@ -73,7 +73,7 @@ def handle_trans(node):
                 """Phase 1"""
                 print("I am sender")
 
-                digital_signature = sign_msg(node.pvt_key, pickle.dumps(txs, protocol=0))
+                digital_signature = sign_msg(node.pvt_key, repr(txs))
                 logger.info("Generated Digital Signature %r", digital_signature)
                 senders_pub_key = (yield from node.get(txs[0].sender))[1]
 
