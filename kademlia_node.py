@@ -3,40 +3,13 @@ import logging
 import socket
 import pickle
 
-from functools import wraps
-
 from routing_table import RoutingTable
-from datagram_rpc import DatagramRPCProtocol
+from datagram_rpc import DatagramRPCProtocol, rpc
+
 from utils import sha1_int, random_id
 
 
 logger = logging.getLogger('node')
-
-
-def remote(func):
-    """
-    A decorator used to indicate an RPC.
-
-    All @remote procedures if explicitly called via a request message must have node.identifier as the first argument
-    All @remote procedures return a 2-tuple: (node_identifier, response)
-
-    The node_identifier is consumed by kademlia to update its tables,
-    while the response is sent as a reply back to the caller.
-    """
-    @asyncio.coroutine
-    @wraps(func)
-    def inner(*args, **kwargs):
-        instance, peer, *args = args
-        response = yield from instance.request(peer, inner.remote_name, *args, **kwargs)
-        return response
-
-    # string: name of function
-    inner.remote_name = func.__name__
-
-    # callable: function object
-    inner.reply_function = func
-
-    return inner
 
 
 class KademliaNode(DatagramRPCProtocol):
@@ -63,7 +36,7 @@ class KademliaNode(DatagramRPCProtocol):
         # The k-bucket based kademlia routing table
         self.routing_table = RoutingTable(self.identifier, k=self.k)
 
-    @remote
+    @rpc
     def ping(self, peer, peer_identifier):
         logger.info('handling ping(%r, %r)', peer, peer_identifier)
 
@@ -71,7 +44,7 @@ class KademliaNode(DatagramRPCProtocol):
         # While the 2nd is sent as a reply back to the caller
         return (self.identifier, self.identifier)
 
-    @remote
+    @rpc
     def store(self, peer, peer_identifier, key, value):
         logger.info('handling store(%r, %r, %r, %r)',
                     peer, peer_identifier, key, value)
@@ -79,7 +52,7 @@ class KademliaNode(DatagramRPCProtocol):
         self.storage[key] = value
         return (self.identifier, True)
 
-    @remote
+    @rpc
     def find_node(self, peer, peer_identifier, key):
         logger.info('handling find_node(%r, %r, %r)',
                     peer, peer_identifier, key)
@@ -87,7 +60,7 @@ class KademliaNode(DatagramRPCProtocol):
         response = self.routing_table.find_closest_peers(key, excluding=peer_identifier)
         return (self.identifier, response)
 
-    @remote
+    @rpc
     def find_value(self, peer, peer_identifier, key):
         logger.info('handling find_value(%r, %r, %r)',
                     peer, peer_identifier, key)

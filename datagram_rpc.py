@@ -3,9 +3,39 @@ import pickle
 import logging
 import socket
 
+from functools import wraps
+
 from utils import random_id
 
 logger = logging.getLogger(__name__)
+
+
+def rpc(func):
+    """
+    A decorator used to indicate an RPC.
+
+    All @rpc methods if explicitly called via a request message must have
+    node.identifier as the first argument.
+
+    All @rpc methods return a 2-tuple: (node_identifier, response)
+
+    The node_identifier is consumed by kademlia to update its tables,
+    while the response is sent as a reply back to the caller.
+    """
+    @asyncio.coroutine
+    @wraps(func)
+    def inner(*args, **kwargs):
+        instance, peer, *args = args
+        response = yield from instance.request(peer, inner.remote_name, *args, **kwargs)
+        return response
+
+    # string: name of function
+    inner.remote_name = func.__name__
+
+    # callable: function object
+    inner.reply_function = func
+
+    return inner
 
 
 class DatagramRPCProtocol(asyncio.DatagramProtocol):

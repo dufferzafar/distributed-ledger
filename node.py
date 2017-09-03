@@ -1,6 +1,6 @@
 import logging
 
-from kademlia_node import KademliaNode, remote
+from kademlia_node import KademliaNode, rpc
 from utils import gen_pub_pvt, verify_msg
 
 from transaction import Ledger
@@ -73,7 +73,7 @@ class Node(KademliaNode):
 
         super(Node, self).reply_received(peer, message_identifier, response)
 
-    @remote
+    @rpc
     def send_bitcoins(self, peer_sock, peer_id, receiver_id, witness_id, amount):
         # This node is the sender
         # Caller is the node that initiated the call (can be sender itself or cli.py)
@@ -91,7 +91,7 @@ class Node(KademliaNode):
 
         return (self.identifier, response)
 
-    @remote
+    @rpc
     def become_receiver(self, peer_sock, peer_id, txs):
         logger.info("Handling request to become receiver for the transactions %r", txs)
 
@@ -106,7 +106,7 @@ class Node(KademliaNode):
             self.isbusy = (True, txs)
             return (self.identifier, "yes")  # return yes
 
-    @remote
+    @rpc
     def become_witness(self, peer_sock, peer_id, txs):
         logger.info("Handling request to become receiver for the transaction %r", txs)
         if self.isbusy[0] and self.isbusy[1] != txs:  # check if node busy in other trans
@@ -120,22 +120,22 @@ class Node(KademliaNode):
             self.isbusy = (True, txs)
             return (self.identifier, "yes")  # return yes
 
-    @remote
+    @rpc
     def get_ledger(self, peer_sock, peer_id):
         return (self.identifier, self.ledger)
 
-    @remote
+    @rpc
     def print_ledger(self, peer_sock, peer_id):
         print(self.ledger)
         return (self.identifier, True)
 
-    @remote
+    @rpc
     def add_tx_to_ledger(self, peer, peer_id, tx):
         self.ledger.add_tx(tx)
         logger.info("Added transaction %d to the ledger", tx.id)
         return (self.identifier, True)
 
-    @remote
+    @rpc
     def commit_tx(self, peer, peer_id, txs, digital_signature, pub_key, *args):
 
         logger.info("Verifying Digital Signature %r", txs)
@@ -192,7 +192,7 @@ class Node(KademliaNode):
             logger.info("Digital Signature Verification Failed!")
             return (self.identifier, "abort")
 
-    @remote
+    @rpc
     def abort_tx(self, peer, peer_id, txs):
 
         for tx in txs:
