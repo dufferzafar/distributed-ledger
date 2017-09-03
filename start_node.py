@@ -65,47 +65,47 @@ def handle_trans(node):
     logger = logging.getLogger('node')
     while True:
         if(node.isbusy[0]):  # if involved in some transaction
-            tx = node.isbusy[1]  # get that transaction
+            txs = node.isbusy[1]  # get that transaction
 
-            if tx.sender == node.identifier:  # if current node is the sender
+            if txs[0].sender == node.identifier:  # if current node is the sender
                 """Phase 1"""
                 print("I am sender")
-                receiver_sock = (yield from node.get(tx.receiver))[0]
-                receiver_status = yield from node.become_receiver(receiver_sock, node.identifier, tx)
-                witness_sock = (yield from node.get(tx.witness))[0]
-                witness_status = yield from node.become_witness(witness_sock, node.identifier, tx)
+                receiver_sock = (yield from node.get(txs[0].receiver))[0]
+                receiver_status = yield from node.become_receiver(receiver_sock, node.identifier, txs)
+                witness_sock = (yield from node.get(txs[0].witness))[0]
+                witness_status = yield from node.become_witness(witness_sock, node.identifier, txs)
 
                 if receiver_status == "busy" or witness_status == "busy":
                     logger.info("Phase 1 failed, aborting transaction!")
-                    receiver_abort = yield from node.abort_tx(receiver_sock, node.identifier, tx)  # send abort to receiver
-                    witness_abort = yield from node.abort_tx(witness_sock, node.identifier, tx)  # send abort to witness
+                    receiver_abort = yield from node.abort_tx(receiver_sock, node.identifier, txs)  # send abort to receiver
+                    witness_abort = yield from node.abort_tx(witness_sock, node.identifier, txs)  # send abort to witness
 
                     if (witness_abort == "aborted" and receiver_abort == "aborted"):
-                        yield from node.abort_tx(node.transport.get_extra_info('sockname'), node.identifier, tx)  # send abort to itslef(sender)
+                        yield from node.abort_tx(node.transport.get_extra_info('sockname'), node.identifier, txs)  # send abort to itslef(sender)
                 else:
                     logger.info("Phase 1 Complete. Entering Phase two")
                     """ Phase 2 """
-                    receiver_commit = yield from node.commit_tx(receiver_sock, node.identifier, tx)  # send commit to receiver
-                    witness_commit = yield from node.commit_tx(witness_sock, node.identifier, tx)  # send commit to receiver
+                    receiver_commit = yield from node.commit_tx(receiver_sock, node.identifier, txs)  # send commit to receiver
+                    witness_commit = yield from node.commit_tx(witness_sock, node.identifier, txs)  # send commit to receiver
 
                     if (witness_commit == "committed" and receiver_commit == "committed"):
                         logger.info("Phase 2 Complete")
-                        yield from node.commit_tx(node.transport.get_extra_info('sockname'), node.identifier, tx)  # Commit transaction
-                        yield from node.broadcast(random_id(), 'commit_tx', node.identifier, tx)
+                        yield from node.commit_tx(node.transport.get_extra_info('sockname'), node.identifier, txs)  # Commit transaction
+                        yield from node.broadcast(random_id(), 'commit_tx', node.identifier, txs)
                         node.isbusy = (False, None)
                     
                     else:
-                        receiver_abort = yield from node.abort_tx(receiver_sock, node.identifier, tx)  # send abort to receiver
-                        witness_abort = yield from node.abort_tx(witness_sock, node.identifier, tx)  # send abort to witness
+                        receiver_abort = yield from node.abort_tx(receiver_sock, node.identifier, txs)  # send abort to receiver
+                        witness_abort = yield from node.abort_tx(witness_sock, node.identifier, txs)  # send abort to witness
 
                         if (witness_abort == "aborted" and receiver_abort == "aborted"):
-                            yield from node.abort_tx(node.transport.get_extra_info('sockname'), node.identifier, tx)  # send abort to itslef(sender)
+                            yield from node.abort_tx(node.transport.get_extra_info('sockname'), node.identifier, txs)  # send abort to itslef(sender)
                 # do the work of sender
 
-            elif tx.receiver == node.identifier:
+            elif txs[0].receiver == node.identifier:
                 print("I am receiver")
                 # do the work of receiver
-            elif tx.witness == node.identifier:
+            elif txs[0].witness == node.identifier:
                 print("I am witness")
                 # do the work of witnes
         yield from asyncio.sleep(1)

@@ -220,7 +220,7 @@ class Node(DatagramRPCProtocol):
                 logger.info("Trasaction %r successfully committed", txs)
 
                 if(self.identifier in [txs[0].sender, txs[0].receiver, txs[0].witness]):
-            self.isbusy = (False, None)  # Now node is free
+                    self.isbusy = (False, None)  # Now node is free
 
                 return (self.identifier, "committed")
             else:
@@ -228,7 +228,7 @@ class Node(DatagramRPCProtocol):
                 return (self.identifier, "abort")
         elif history_tx == "old":
             logger.info("Transaction already in Ledger")
-        return (self.identifier, "committed")
+            return (self.identifier, "committed")
         else:
             logger.info("Weird Transaction")
             return (self.identifier, "abort")
@@ -386,7 +386,7 @@ class Node(DatagramRPCProtocol):
             # Store my information onto the network
             # (allowing others to find me)
             yield from self.put(self.identifier, (self.socket_addr, self.pub_key))
-        
+
             my_genesis_tx = self.ledger.record[0]  # my genesis transaction
             yield from self.add_tx_to_ledger(known_node, self.identifier, my_genesis_tx)  # add it to the ledger of bootstrapper
 
