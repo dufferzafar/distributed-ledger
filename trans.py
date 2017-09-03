@@ -36,9 +36,27 @@ class Ledger(object):
             txs.append(Transaction(sender, sender, witness, money - amount, input_tx=input_tx))
         return True, txs
 
-    def verify_trans(self, tx):
-        pass
-        # TODO method to verify a transaction based on existing ledger
+    def verify_trans(self, txs):
+        if((len(txs) == 2 and
+                txs[0].input_tx == txs[1].input_tx and
+                txs[0].sender == txs[1].sender and
+                txs[0].witness == txs[1].witness) or
+                len(txs) == 1):
+            input_tx = txs[0].input_tx
+            sender = txs[0].sender
+            money = 0
+            
+            for tx in input_tx:
+                if tx not in self.record or tx.receiver != sender or self.record[self.record.index(tx)].spent:
+                    return False
+                else:
+                    money += tx.amount
+
+            if money != txs[0].amount + (txs[1].amount if len(txs) == 2 else 0):
+                return False
+            return True
+        else:
+            return False
 
     def __iter__(self):
         return iter(self.record)
