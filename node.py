@@ -203,12 +203,26 @@ class Node(DatagramRPCProtocol):
             history_tx = "old"  # transaction already in ledger
         if(len(txs) == 2 and txs[1] not in self.ledger.record and history_tx == "old"):
             history_tx = "weird"  # incorrect transaction not possible
+
+        if history_tx == "new":
+            logger.info("Verifying Tranaction %r", txs)
+            if self.ledger.verify_trans(txs):
+                logger.info("Trnsaction successfully verified")
+                logger.info("Adding Transaction to ledger")
+
+                if(self.identifier in [txs[0].sender, txs[0].receiver, txs[0].witness]):
             self.isbusy = (False, None)  # Now node is free
 
-        logger.info("Trasaction %d successfully committed", tx.tx_id)
-        # TODO add transactoin to ledgger
-        # if successfull return commit else reutrn false
+                return (self.identifier, "committed")
+            else:
+                logger.info("Trnsaction verification failed")
+                return (self.identifier, "abort")
+        elif history_tx == "old":
+            logger.info("Transaction already in Ledger")
         return (self.identifier, "committed")
+        else:
+            logger.info("Weird Transaction")
+            return (self.identifier, "abort")
 
     @remote
     def abort_tx(self, peer, peer_id, tx):
