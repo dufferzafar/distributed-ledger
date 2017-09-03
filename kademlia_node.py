@@ -5,6 +5,7 @@ import pickle
 
 from functools import wraps
 
+from routing_table import RoutingTable
 from utils import sha1_int, random_id
 
 logger = logging.getLogger('node')
@@ -37,6 +38,25 @@ def remote(func):
 
 
 class KademliaNode():
+
+    def __init__(self, alpha=3, k=20, identifier=None):
+
+        # TODO: Make the node id a function of node's public key
+        # Just like Bitcoin wallet IDs use HASH160
+        if identifier is None:
+            identifier = random_id()
+
+        self.identifier = identifier
+
+        # Constants from the kademlia protocol
+        self.k = k
+        self.alpha = alpha
+
+        # Each node has their own dictionary
+        self.storage = {}
+
+        # The k-bucket based kademlia routing table
+        self.routing_table = RoutingTable(self.identifier, k=self.k)
 
     @remote
     def ping(self, peer, peer_identifier):

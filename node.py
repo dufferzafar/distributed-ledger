@@ -1,39 +1,24 @@
 import logging
 
 from kademlia_node import KademliaNode, remote
-from routing_table import RoutingTable
 from datagram_rpc import DatagramRPCProtocol
 
-from utils import random_id, gen_pub_pvt, verify_msg
+from utils import gen_pub_pvt, verify_msg
 
 from transaction import Ledger
 
 logger = logging.getLogger(__name__)
 
 
-class Node(KademliaNode, DatagramRPCProtocol):
+class Node(DatagramRPCProtocol, KademliaNode):
 
-    def __init__(self, alpha=3, k=20, identifier=None):
+    def __init__(self):
+
+        # Initialize DatagramRPCProtocol & KademliaNode first
+        super(Node, self).__init__()
 
         # Generate public private key pair
         self.pub_key, self.pvt_key = gen_pub_pvt()
-
-        # TODO: Make the node id a function of node's public key
-        # Just like Bitcoin wallet IDs use HASH160
-        if identifier is None:
-            identifier = random_id()
-
-        self.identifier = identifier
-
-        # Constants from the kademlia protocol
-        self.k = k
-        self.alpha = alpha
-
-        # Each node has their own dictionary
-        self.storage = {}
-
-        # The k-bucket based kademlia routing table
-        self.routing_table = RoutingTable(self.identifier, k=k)
 
         # Am I busy handling some transaction? (Status, Transaction)
         self.isbusy = (False, None)
@@ -45,8 +30,6 @@ class Node(KademliaNode, DatagramRPCProtocol):
 
         # My list of transactions
         self.ledger = Ledger(self.identifier)
-
-        super(Node, self).__init__()
 
     def storage_str(self):
         dht = ""
