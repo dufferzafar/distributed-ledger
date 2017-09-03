@@ -235,10 +235,14 @@ class Node(DatagramRPCProtocol):
 
     @remote
     def abort_tx(self, peer, peer_id, tx):
-        # TODO remove transaction from ledger if already added
-        if self.isbusy[0] and self.isbusy[1] == tx:
+        for tx in txs:
+            if tx in self.ledger.record:
+                self.ledger.record.remove(tx)
+        # TODO revert state of input transactions (only if it was changed)...undo logs required
+
+        if self.isbusy[0] and self.isbusy[1] == txs:
             self.isbusy = (False, None)
-            logger.info("Trasaction %d aborted!", tx.tx_id)
+            logger.info("Trasaction %r aborted!", txs)
             return (self.identifier, "aborted")
 
         return (self.identifier, "Not involved in this transaction")
