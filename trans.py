@@ -12,23 +12,24 @@ class Ledger(object):
 
     def __init__(self, node_id):
         self.node_id = node_id  # belong to which node
-        self.ledger = [Transaction(None, node_id, None, 100, None)]  # Genesis Transaction
+        self.record = [Transaction(None, node_id, None, 100, None)]  # Genesis Transaction
 
     def add_tx(self, tx):
-        if tx not in self.ledger:
-            self.ledger.append(tx)
-            self.ledger.sort(key=lambda tx: tx.tx_id)
+        if tx not in self.record:
+            self.record.append(tx)
+            self.record.sort(key=lambda tx: tx.tx_id)
+
 
     def verify_trans(self, tx):
         pass
         # TODO method to verify a transaction based on existing ledger
 
     def __iter__(self):
-        return iter(self.ledger)
+        return iter(self.record)
 
     def __repr__(self):
         r = ""
-        for _ in self.ledger:
+        for _ in self.record:
             r += (repr(_) + "\n")
         return r
 
