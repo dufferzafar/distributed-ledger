@@ -7,7 +7,6 @@ import signal
 import config
 
 from node import Node
-from trans import Transaction
 from utils import random_id
 
 

@@ -8,7 +8,8 @@ from functools import wraps
 from routing_table import RoutingTable
 from utils import sha1_int, random_id, gen_pub_pvt
 from datagram_rpc import DatagramRPCProtocol
-from trans import Transaction, Ledger
+
+from transaction import Ledger
 
 logger = logging.getLogger(__name__)
 
