@@ -19,6 +19,22 @@ class Ledger(object):
             self.record.append(tx)
             self.record.sort(key=lambda tx: tx.tx_id)
 
+    def gen_trans(self, sender, receiver, witness, amount):
+        money = 0
+        input_tx = []
+        txs = []
+        for trans in self.record:
+            if not trans.spent and trans.receiver == sender:
+                money += trans.amount
+                input_tx.append(trans)
+            if money >= amount:
+                break
+        if money < amount:
+            return False, txs
+        txs.append(Transaction(sender, receiver, witness, amount, input_tx=input_tx))
+        if money > amount:
+            txs.append(Transaction(sender, sender, witness, money - amount, input_tx=input_tx))
+        return True, txs
 
     def verify_trans(self, tx):
         pass
