@@ -98,13 +98,13 @@ def handle_trans(node):
                     logger.info("Phase 1 complete - Now entering Phase 2")
 
                     # Send commit to both receiver & witness
-                    receiver_commit = yield from node.commit_tx(receiver_sock, node.identifier, txs)
-                    witness_commit = yield from node.commit_tx(witness_sock, node.identifier, txs)
+                    receiver_commit = yield from node.commit_tx(receiver_sock, node.identifier, txs, digital_signature, senders_pub_key)
+                    witness_commit = yield from node.commit_tx(witness_sock, node.identifier, txs, digital_signature, senders_pub_key)
 
                     if (witness_commit == "committed" and receiver_commit == "committed"):
                         logger.info("Phase 2 complete")
-                        yield from node.commit_tx(node.socket_addr, node.identifier, txs)  # Commit transaction
-                        yield from node.broadcast(random_id(), 'commit_tx', node.identifier, txs)
+                        yield from node.commit_tx(node.socket_addr, node.identifier, txs, digital_signature, senders_pub_key)  # Commit transaction
+                        yield from node.broadcast(random_id(), 'commit_tx', node.identifier, txs, digital_signature, senders_pub_key)
                         node.isbusy = (False, None)
 
                     else:

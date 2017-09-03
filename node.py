@@ -207,7 +207,7 @@ class Node(DatagramRPCProtocol):
         return (self.identifier, True)
 
     @remote
-    def commit_tx(self, peer, peer_id, txs, *args):
+    def commit_tx(self, peer, peer_id, txs, digital_signature, pub_key, *args):
         tx_type = "new"
 
         # Transaction already in ledger
