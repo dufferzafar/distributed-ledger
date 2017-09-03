@@ -1,8 +1,6 @@
 import logging
 
 from kademlia_node import KademliaNode, remote
-from datagram_rpc import DatagramRPCProtocol
-
 from utils import gen_pub_pvt, verify_msg
 
 from transaction import Ledger
@@ -10,11 +8,11 @@ from transaction import Ledger
 logger = logging.getLogger(__name__)
 
 
-class Node(DatagramRPCProtocol, KademliaNode):
+class Node(KademliaNode):
 
     def __init__(self):
 
-        # Initialize DatagramRPCProtocol & KademliaNode first
+        # Initialize KademliaNode
         super(Node, self).__init__()
 
         # Generate public private key pair

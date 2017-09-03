@@ -6,7 +6,9 @@ import pickle
 from functools import wraps
 
 from routing_table import RoutingTable
+from datagram_rpc import DatagramRPCProtocol
 from utils import sha1_int, random_id
+
 
 logger = logging.getLogger('node')
 
@@ -37,9 +39,12 @@ def remote(func):
     return inner
 
 
-class KademliaNode():
+class KademliaNode(DatagramRPCProtocol):
 
     def __init__(self, alpha=3, k=20, identifier=None):
+
+        # Initialiaze DatagramRPCProtocol
+        super(KademliaNode, self).__init__()
 
         # TODO: Make the node id a function of node's public key
         # Just like Bitcoin wallet IDs use HASH160
