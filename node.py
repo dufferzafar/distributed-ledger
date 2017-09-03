@@ -189,6 +189,11 @@ class Node(DatagramRPCProtocol):
         return (self.identifier, self.ledger)
 
     @remote
+    def print_ledger(self, peer_sock, peer_id):
+        print(self.ledger)
+        return (self.identifier, "done")
+
+    @remote
     def add_tx_to_ledger(self, peer, peer_id, tx):
         logger.info("Adding Transaction %d to the ledger", tx.tx_id)
         self.ledger.add_tx(tx)
