@@ -10,9 +10,11 @@ class Ledger(object):
     """
 
     def __init__(self, node_id):
-        self.node_id = node_id  # belong to which node
+        # ID of the Ledger owner
+        self.node_id = node_id
+
         # Genesis Transaction
-        self.record = [Transaction(None, node_id, None, 100, None)]
+        self.record = [Transaction.genesis(receiver=node_id)]
 
     def __iter__(self):
         return iter(self.record)
@@ -129,6 +131,10 @@ class Transaction(object):
         # A transaction starts as unspent - but will get spent once it becomes
         # the input of some other transaction.
         self.spent = False
+
+    @staticmethod
+    def genesis(receiver, amount=100):
+        return Transaction(sender=None, receiver=receiver, witness=None, amount=amount, input_tx=None)
 
     def __eq__(self, other):
         # No need to compare other attributes as the ID must be unique
