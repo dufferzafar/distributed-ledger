@@ -153,10 +153,26 @@ class Transaction(object):
 
 
 if __name__ == '__main__':
-    tx1 = Transaction(None, "a", "a", 100, None)
+
     l = Ledger("a")
-    tx2 = Transaction(None, "a", "a", 100, None)
-    l.add_tx(tx2)
-    l.add_tx(tx1)
-    txs = [Transaction("a","b","c",50, [tx1]), Transaction("b","a","c",50, [tx1])]
+
+    # Get the genesis transaction of the ledger
+    tx1 = l[0]
+
+    txs = [
+        Transaction("a", "b", "c", 50, [tx1]),
+        Transaction("a", "a", "c", 50, [tx1]),
+    ]
+
     print(l.verify_trans(txs))
+
+    tx2 = Transaction(None, "a", "a", 100, None)
+
+    # We can now add two transactions
+    print(tx1 + tx2)
+
+    # Or sum a list
+    print(sum(txs))
+
+    # Or sum the ledger itself
+    print(sum(l))
