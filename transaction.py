@@ -32,7 +32,7 @@ class Ledger(object):
     def add_tx(self, tx):
         if tx not in self.record:
             self.record.append(tx)
-            self.record.sort(key=lambda tx: tx.tx_id)
+            self.record.sort(key=lambda tx: tx.id)
 
     def gen_trans(self, sender, receiver, witness, amount):
         """
@@ -118,7 +118,7 @@ class Transaction(object):
 
         # Transaction ID is time (for virtual synchrony)
         # (multiplying by 10^9 gives us nanoseconds)
-        self.tx_id = int(time.time() * (10**9))
+        self.id = int(time.time() * (10**9))
 
         # List of input transactions (None for Genesis)
         self.input_tx = input_tx
@@ -138,7 +138,7 @@ class Transaction(object):
 
     def __eq__(self, other):
         # No need to compare other attributes as the ID must be unique
-        return self.tx_id == other.tx_id
+        return self.id == other.id
 
     def __add__(self, other):
         return self.amount + other.amount
@@ -153,7 +153,7 @@ class Transaction(object):
 
     def __repr__(self):
         return ("Transaction(id=%r, sender=%r, receiver=%r, amount=%r, spent=%r)" %
-                (self.tx_id, self.sender, self.receiver, self.amount, self.spent))
+                (self.id, self.sender, self.receiver, self.amount, self.spent))
 
 
 if __name__ == '__main__':
