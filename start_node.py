@@ -1,13 +1,14 @@
 import asyncio
 import logging
 import os
+import pickle
 import sys
 import signal
 
 import config
 
 from node import Node
-from utils import random_id
+from utils import random_id, sign_msg
 
 
 def setup_logging(node_id):
@@ -72,8 +73,9 @@ def handle_trans(node):
                 """Phase 1"""
                 print("I am sender")
 
-                # TODO: Sign this transaction with my private key
-                # TODO: Send my public key along with the transaction - so others can verify
+                digital_signature = sign_msg(node.pvt_key, pickle.dumps(txs, protocol=0))
+                logger.info("Generated Digital Signature %r", digital_signature)
+                senders_pub_key = (yield from node.get(txs[0].sender))[1]
 
                 receiver_sock = (yield from node.get(txs[0].receiver))[0]
                 receiver_status = yield from node.become_receiver(receiver_sock, node.identifier, txs)
