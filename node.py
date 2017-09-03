@@ -64,10 +64,17 @@ class Node(DatagramRPCProtocol):
         # The k-bucket based kademlia routing table
         self.routing_table = RoutingTable(self.identifier, k=k)
 
-        # (Status, Transaction)
+        # Am I busy handling some transaction? (Status, Transaction)
         self.isbusy = (False, None)
+
+        # A list of message_ids that I've broadcasted
+        # (required to stop infinite flooding)
+        # TODO: Move this to DatagramRPCProtocol?
         self.broadcast_list = []
+
+        # My list of transactions
         self.ledger = Ledger(self.identifier)
+
         super(Node, self).__init__()
 
     def storage_str(self):
@@ -80,11 +87,13 @@ class Node(DatagramRPCProtocol):
         peer_identifier = args[0]
         self.routing_table.update_peer(peer_identifier, peer)  # update the routing table
 
+        # TODO: Move this to DatagramRPCProtocol?
         if message_identifier not in self.broadcast_list:  # if message identifier is not in list
             self.broadcast_list.append(message_identifier)  # append it to broadcast list
             self.broadcast(message_identifier, procedure_name, *args)  # broadcast it to other peers
             super(Node, self).broadcast_received(peer, message_identifier, procedure_name, *args)  # call super's broadcast received that will call the procedure_name
         else:
+            # BUG: This should get printed atleast once (but doesn't?)
             print("Old Message")
 
     def request_received(self, peer, message_identifier, procedure_name, args, kwargs):
