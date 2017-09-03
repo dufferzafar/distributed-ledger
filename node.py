@@ -154,31 +154,31 @@ class Node(DatagramRPCProtocol):
         return (self.identifier, response)
 
     @remote
-    def become_receiver(self, peer_sock, peer_id, tx):
-        logger.info("Handling request to become receiver for the transaction %d", tx.tx_id)
-        if self.isbusy[0] and self.isbusy[1] != tx:  # check if node busy in other trans
+    def become_receiver(self, peer_sock, peer_id, txs):
+        logger.info("Handling request to become receiver for the transactions %r", txs)
+        if self.isbusy[0] and self.isbusy[1] != txs:  # check if node busy in other trans
             logger.info("Cannot become receiver already busy in other tranasction")
             return (self.identifier, "busy")  # return busy
         else:
             # TODO perform validation of the transaction
             # do other checks if needed
             # if everything is fine
-            logger.info("Became receiver for the transaction %d", tx.tx_id)
-            self.isbusy = (True, tx)  # set node busy in tx
+            logger.info("Became receiver for the transactions %r", txs)
+            self.isbusy = (True, txs)  # set node busy in tx
             return (self.identifier, "yes")  # return yes
 
     @remote
-    def become_witness(self, peer_sock, peer_id, tx):
-        logger.info("Handling request to become receiver for the transaction %d", tx.tx_id)
-        if self.isbusy[0] and self.isbusy[1] != tx:  # check if node busy in other trans
+    def become_witness(self, peer_sock, peer_id, txs):
+        logger.info("Handling request to become receiver for the transaction %r", txs)
+        if self.isbusy[0] and self.isbusy[1] != txs:  # check if node busy in other trans
             logger.info("Cannot become witness already busy in another tranasction")
             return (self.identifier, "busy")  # return busy
         else:
             # TODO perform validation of the transaction
             # do other checks if needed
             # if everything is fine
-            logger.info("Became witness for the transaction %d", tx.tx_id)
-            self.isbusy = (True, tx)  # set node busy in tx
+            logger.info("Became witness for the transaction %r", txs)
+            self.isbusy = (True, txs)  # set node busy in tx
             return (self.identifier, "yes")  # return yes
 
     @remote
