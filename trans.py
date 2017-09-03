@@ -14,6 +14,21 @@ class Ledger(object):
         # Genesis Transaction
         self.record = [Transaction(None, node_id, None, 100, None)]
 
+    def __iter__(self):
+        return iter(self.record)
+
+    def __repr__(self):
+        r = ""
+        for _ in self.record:
+            r += (repr(_) + "\n")
+        return r
+
+    def __getitem__(self, idx):
+        return self.record[idx]
+
+    def index(self, item):
+        return self.record.index(item)
+
     # TODO: Support adding a list of transactions (list.extend)
     def add_tx(self, tx):
         if tx not in self.record:
@@ -99,15 +114,6 @@ class Ledger(object):
 
         else:
             return False
-
-    def __iter__(self):
-        return iter(self.record)
-
-    def __repr__(self):
-        r = ""
-        for _ in self.record:
-            r += (repr(_) + "\n")
-        return r
 
 
 class Transaction(object):
