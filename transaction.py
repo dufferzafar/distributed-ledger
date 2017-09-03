@@ -20,7 +20,7 @@ class Ledger(object):
         return iter(self.record)
 
     def __repr__(self):
-        return "Ledger(records=%r)" % self.record
+        return "Ledger(records=[\n%s\n])" % ",\n".join([repr(tx) for tx in self.record])
 
     def __getitem__(self, idx):
         return self.record[idx]
