@@ -104,10 +104,7 @@ class Ledger(object):
                     input_amount += tx.amount
 
             # Sum of inputs should match the sum of outputs
-            # TODO: This could be replaced by sum() by adding an __radd__
-            # method to the transaction class
-            output_amount = txs[0].amount + (txs[1].amount if len(txs) == 2 else 0)
-            if input_amount != output_amount:
+            if input_amount != sum(txs):
                 return False
 
             return True
