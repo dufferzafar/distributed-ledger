@@ -1,4 +1,3 @@
-from utils import random_id
 import time
 
 
@@ -12,28 +11,52 @@ class Ledger(object):
 
     def __init__(self, node_id):
         self.node_id = node_id  # belong to which node
-        self.record = [Transaction(None, node_id, None, 100, None)]  # Genesis Transaction
+        # Genesis Transaction
+        self.record = [Transaction(None, node_id, None, 100, None)]
 
+    # TODO: Support adding a list of transactions (list.extend)
     def add_tx(self, tx):
         if tx not in self.record:
             self.record.append(tx)
             self.record.sort(key=lambda tx: tx.tx_id)
 
     def gen_trans(self, sender, receiver, witness, amount):
-        money = 0
-        input_tx = []
-        txs = []
-        for trans in self.record:
-            if not trans.spent and trans.receiver == sender:
-                money += trans.amount
-                input_tx.append(trans)
-            if money >= amount:
+        """
+        Generate a new transaction (or a pair of them.)
+
+        This may fail if the sender doesn't have sufficient balance.
+        """
+
+        sender_balance = 0
+        input_txs = []
+
+        for tx in self.record:
+
+            # Find unspent transactions owned by the sender
+            if not tx.spent and tx.receiver == sender:
+                sender_balance += tx.amount
+                input_txs.append(tx)
+
+            # Found transactions with enough balance?
+            if sender_balance >= amount:
                 break
-        if money < amount:
-            return False, txs
-        txs.append(Transaction(sender, receiver, witness, amount, input_tx=input_tx))
-        if money > amount:
-            txs.append(Transaction(sender, sender, witness, money - amount, input_tx=input_tx))
+
+        # Could not find sufficient inputs
+        # (Sender doesn't have enough balance)
+        if sender_balance < amount:
+            return False, []
+
+        txs = []
+
+        # Add a transaction from sender to receiver
+        txs.append(Transaction(sender, receiver, witness, amount,
+                               input_tx=input_txs))
+
+        # When sender has more than enough balance - we credit the rest back to them
+        if sender_balance > amount:
+            txs.append(Transaction(sender, sender, witness, sender_balance - amount,
+                                   input_tx=input_txs))
+
         return True, txs
 
     def verify_trans(self, txs):
