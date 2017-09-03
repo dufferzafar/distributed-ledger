@@ -120,16 +120,36 @@ class Transaction(object):
 
     def __init__(self, sender, receiver, witness, amount, input_tx=None):
 
-        self.tx_id = time.time() * (10**9)  # transaction id is time(for virtual synchrony) multiplying 10^9 it to get time in nanoseconds
-        self.input_tx = input_tx  # input transactions, None for Genesis
+        # Transaction ID is time (for virtual synchrony)
+        # (multiplying by 10^9 gives us nanoseconds)
+        self.tx_id = time.time() * (10**9)
+
+        # List of input transactions (None for Genesis)
+        self.input_tx = input_tx
+
         self.sender = sender
         self.receiver = receiver
         self.witness = witness
         self.amount = amount
+
+        # A transaction starts as unspent - but will get spent once it becomes
+        # the input of some other transaction.
         self.spent = False
 
     def __eq__(self, other):
-        return self.tx_id == other.tx_id  # no need to compare other attributes id must be unique
+        # No need to compare other attributes as the ID must be unique
+        return self.tx_id == other.tx_id
+
+    def __add__(self, other):
+        return self.amount + other.amount
+
+    def __radd__(self, other):
+        """Add two transactions or a transaction and an int."""
+
+        if isinstance(other, int):
+            return self.amount + other
+
+        return self.amount + other.amount
 
     def __repr__(self):
         return "%r %r %r %r %r" % (repr(int(self.tx_id)), repr(self.sender), repr(self.receiver), repr(self.amount), repr(self.spent))
