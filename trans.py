@@ -52,7 +52,8 @@ class Ledger(object):
         txs.append(Transaction(sender, receiver, witness, amount,
                                input_tx=input_txs))
 
-        # When sender has more than enough balance - we credit the rest back to them
+        # When a sender has more than enough balance
+        # We credit the rest back to them. (Just like bitcoin does.)
         if sender_balance > amount:
             txs.append(Transaction(sender, sender, witness, sender_balance - amount,
                                    input_tx=input_txs))
@@ -60,24 +61,42 @@ class Ledger(object):
         return True, txs
 
     def verify_trans(self, txs):
-        if((len(txs) == 2 and
-                txs[0].input_tx == txs[1].input_tx and
-                txs[0].sender == txs[1].sender and
-                txs[0].witness == txs[1].witness) or
-                len(txs) == 1):
-            input_tx = txs[0].input_tx
-            sender = txs[0].sender
-            money = 0
-            
-            for tx in input_tx:
-                if tx not in self.record or tx.receiver != sender or self.record[self.record.index(tx)].spent:
+        """
+        Verify that a transaction (pair) is valid wrt the ledger.
+        """
+
+        # If the tranasction is a pair - both of them should have same fields
+        if(len(txs) == 1) or (len(txs) == 2 and
+                              txs[0].input_tx == txs[1].input_tx and
+                              txs[0].sender == txs[1].sender and
+                              txs[0].witness == txs[1].witness):
+
+            input_amount = 0
+
+            # Check whether all input transactions are correctly valid
+            for tx in txs[0].input_tx:
+
+                if (
+                    # An input may be invalid because
+                    tx not in self.record or  # It may be Unknown
+                    # It may not be owned by the sender
+                    tx.receiver != txs[0].sender or
+                    # It may be already spent
+                    self.record[self.record.index(tx)].spent
+                ):
                     return False
                 else:
-                    money += tx.amount
+                    input_amount += tx.amount
 
-            if money != txs[0].amount + (txs[1].amount if len(txs) == 2 else 0):
+            # Sum of inputs should match the sum of outputs
+            # TODO: This could be replaced by sum() by adding an __radd__
+            # method to the transaction class
+            output_amount = txs[0].amount + (txs[1].amount if len(txs) == 2 else 0)
+            if input_amount != output_amount:
                 return False
+
             return True
+
         else:
             return False
 
