@@ -29,6 +29,7 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
         logger.info('connection_made: %r', transport)
 
         self.transport = transport
+        self.socket_addr = self.transport.get_extra_info('sockname')
 
     def datagram_received(self, data, peer):
         logger.info('data_received: %r, %r', peer, data)

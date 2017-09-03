@@ -400,10 +400,6 @@ class Node(DatagramRPCProtocol):
             # Check if my public key is already in the network
             yield from self.get(self.identifier)
         except KeyError:
-
-            # The socket I'm listening on
-            self.socket_addr = self.transport.get_extra_info('sockname')
-
             # Store my information onto the network
             # (allowing others to find me)
             yield from self.put(self.identifier, (self.socket_addr, self.pub_key))
