@@ -88,9 +88,10 @@ class Transaction(object):
 
 
 if __name__ == '__main__':
-    tx1 = Transaction(None, "third", None, None, 100)
-    l = Ledger("second")
-    tx2 = Transaction(None, "first", None, None, 100)
-    l.add_trans(tx2)
-    l.add_trans(tx1)
-    print(l)
+    tx1 = Transaction(None, "a", "a", 100, None)
+    l = Ledger("a")
+    tx2 = Transaction(None, "a", "a", 100, None)
+    l.add_tx(tx2)
+    l.add_tx(tx1)
+    txs = [Transaction("a","b","c",50, [tx1]), Transaction("b","a","c",50, [tx1])]
+    print(l.verify_trans(txs))
