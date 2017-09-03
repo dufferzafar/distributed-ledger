@@ -50,7 +50,7 @@ class Transaction(object):
         return self.tx_id == other.tx_id  # no need to compare other attributes id must be unique
 
     def __repr__(self):
-        return "%r %r %r %r" % (repr(int(self.tx_id)), repr(self.sender), repr(self.receiver), repr(self.amount))
+        return "%r %r %r %r %r" % (repr(int(self.tx_id)), repr(self.sender), repr(self.receiver), repr(self.amount), repr(self.spent))
 
 
 if __name__ == '__main__':
