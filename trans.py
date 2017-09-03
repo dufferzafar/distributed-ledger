@@ -18,10 +18,7 @@ class Ledger(object):
         return iter(self.record)
 
     def __repr__(self):
-        r = ""
-        for _ in self.record:
-            r += (repr(_) + "\n")
-        return r
+        return "Ledger(records=%r)" % self.record
 
     def __getitem__(self, idx):
         return self.record[idx]
@@ -119,7 +116,7 @@ class Transaction(object):
 
         # Transaction ID is time (for virtual synchrony)
         # (multiplying by 10^9 gives us nanoseconds)
-        self.tx_id = time.time() * (10**9)
+        self.tx_id = int(time.time() * (10**9))
 
         # List of input transactions (None for Genesis)
         self.input_tx = input_tx
@@ -149,7 +146,8 @@ class Transaction(object):
         return self.amount + other.amount
 
     def __repr__(self):
-        return "%r %r %r %r %r" % (repr(int(self.tx_id)), repr(self.sender), repr(self.receiver), repr(self.amount), repr(self.spent))
+        return ("Transaction(id=%r, sender=%r, receiver=%r, amount=%r, spent=%r)" %
+                (self.tx_id, self.sender, self.receiver, self.amount, self.spent))
 
 
 if __name__ == '__main__':
@@ -167,6 +165,7 @@ if __name__ == '__main__':
     print(l.verify_trans(txs))
 
     tx2 = Transaction(None, "a", "a", 100, None)
+    l.add_tx(tx2)
 
     # We can now add two transactions
     print(tx1 + tx2)
@@ -176,3 +175,9 @@ if __name__ == '__main__':
 
     # Or sum the ledger itself
     print(sum(l))
+
+    # Demo Transaction.__repr__
+    print(tx1)
+
+    # Demo Ledger.__repr__
+    print(l)
