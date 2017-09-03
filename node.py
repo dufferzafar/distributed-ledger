@@ -210,6 +210,12 @@ class Node(DatagramRPCProtocol):
                 logger.info("Trnsaction successfully verified")
                 logger.info("Adding Transaction to ledger")
 
+                for tx in txs:
+                    logger.info("Adding Transaction %d to the ledger", tx.tx_id)
+                    self.ledger.add_tx(tx)
+
+                logger.info("Trasaction %r successfully committed", txs)
+
                 if(self.identifier in [txs[0].sender, txs[0].receiver, txs[0].witness]):
             self.isbusy = (False, None)  # Now node is free
 
