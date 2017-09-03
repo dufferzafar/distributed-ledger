@@ -4,7 +4,7 @@ import socket
 import pickle
 
 from routing_table import RoutingTable
-from datagram_rpc import DatagramRPCProtocol, rpc
+from rpc_protocol import DatagramRPCProtocol, rpc
 
 from utils import sha1_int, random_id
 
