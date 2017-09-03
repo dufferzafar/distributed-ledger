@@ -197,7 +197,6 @@ class KademliaNode(DatagramRPCProtocol):
         else:
             return sorted(peers - dead, key=distance)[:self.k]
 
-    @asyncio.coroutine
     def broadcast(self, message_identifier, procedure_name, *args, **kwargs):
         """
         Broadcast a message containing a procedure_name to all the nodes
