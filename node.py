@@ -156,15 +156,16 @@ class Node(DatagramRPCProtocol):
     @remote
     def become_receiver(self, peer_sock, peer_id, txs):
         logger.info("Handling request to become receiver for the transactions %r", txs)
-        if self.isbusy[0] and self.isbusy[1] != txs:  # check if node busy in other trans
-            logger.info("Cannot become receiver already busy in other tranasction")
+
+        if self.isbusy[0] and self.isbusy[1] != txs:
+            logger.info("Cannot become receiver already busy in another transaction")
             return (self.identifier, "busy")  # return busy
         else:
-            # TODO perform validation of the transaction
-            # do other checks if needed
-            # if everything is fine
+            # TODO: Perform validation of the transaction
             logger.info("Became receiver for the transactions %r", txs)
-            self.isbusy = (True, txs)  # set node busy in tx
+
+            # I'm now busy handling this tx
+            self.isbusy = (True, txs)
             return (self.identifier, "yes")  # return yes
 
     @remote
@@ -174,11 +175,11 @@ class Node(DatagramRPCProtocol):
             logger.info("Cannot become witness already busy in another tranasction")
             return (self.identifier, "busy")  # return busy
         else:
-            # TODO perform validation of the transaction
-            # do other checks if needed
-            # if everything is fine
+            # TODO: Perform validation of the transaction
             logger.info("Became witness for the transaction %r", txs)
-            self.isbusy = (True, txs)  # set node busy in tx
+
+            # I'm now busy handling this tx
+            self.isbusy = (True, txs)
             return (self.identifier, "yes")  # return yes
 
     @remote
@@ -188,61 +189,77 @@ class Node(DatagramRPCProtocol):
     @remote
     def print_ledger(self, peer_sock, peer_id):
         print(self.ledger)
-        return (self.identifier, "done")
+        return (self.identifier, True)
 
     @remote
     def add_tx_to_ledger(self, peer, peer_id, tx):
-        logger.info("Adding Transaction %d to the ledger", tx.tx_id)
         self.ledger.add_tx(tx)
-        return (self.identifier, "Transaction added")
+        logger.info("Added transaction %d to the ledger", tx.id)
+        return (self.identifier, True)
 
     @remote
     def commit_tx(self, peer, peer_id, txs, *args):
-        history_tx = "new"  # transaction is new
+        tx_type = "new"
+
+        # Transaction already in ledger
         if(txs[0] in self.ledger.record):
-            history_tx = "old"  # transaction already in ledger
-        if(len(txs) == 2 and txs[1] not in self.ledger.record and history_tx == "old"):
-            history_tx = "weird"  # incorrect transaction not possible
+            tx_type = "old"
 
-        if history_tx == "new":
-            logger.info("Verifying Tranaction %r", txs)
+        # Is someone trying to game the system?
+        if(tx_type == "old" and len(txs) == 2 and txs[1] not in self.ledger.record):
+            tx_type = "weird"
+
+        if tx_type == "new":
+            logger.info("Verifying Transaction %r", txs)
+
             if self.ledger.verify_trans(txs):
-                logger.info("Trnsaction successfully verified")
-                logger.info("Adding Transaction to ledger")
+                logger.info("Transaction successfully verified")
 
+                # Mark each of the inputs as spent
                 for tx in txs[0].input_tx:
-                    self.ledger.record[self.ledger.record.index(tx)].spent = True
+                    self.ledger[self.ledger.index(tx)].spent = True
 
+                # Add theses transactions to my ledger
                 for tx in txs:
-                    logger.info("Adding Transaction %d to the ledger", tx.tx_id)
                     self.ledger.add_tx(tx)
+                    logger.info("Added transaction %d to the ledger", tx.id)
 
-                logger.info("Trasaction %r successfully committed", txs)
+                logger.info("Transaction successfully committed %r", txs)
 
+                # I am now free from handling this transaction
                 if(self.identifier in [txs[0].sender, txs[0].receiver, txs[0].witness]):
-                    self.isbusy = (False, None)  # Now node is free
+                    self.isbusy = (False, None)
 
                 return (self.identifier, "committed")
             else:
-                logger.info("Trnsaction verification failed")
+                # TODO: Print the reason it failed too?
+                logger.warn("Transaction verification failed")
+
                 return (self.identifier, "abort")
-        elif history_tx == "old":
+
+        elif tx_type == "old":
             logger.info("Transaction already in Ledger")
             return (self.identifier, "committed")
+
         else:
-            logger.info("Weird Transaction")
+            logger.info("Weird transaction %d", tx[0].id)
             return (self.identifier, "abort")
 
     @remote
-    def abort_tx(self, peer, peer_id, tx):
+    def abort_tx(self, peer, peer_id, txs):
+
         for tx in txs:
             if tx in self.ledger.record:
                 self.ledger.record.remove(tx)
-        # TODO revert state of input transactions (only if it was changed)...undo logs required
+
+        # TODO: Revert the 'spent' field of input transactions
+        # (but only if it was changed)
+        # This requires some kind of an undo log
 
         if self.isbusy[0] and self.isbusy[1] == txs:
             self.isbusy = (False, None)
-            logger.info("Trasaction %r aborted!", txs)
+            logger.info("Transaction %r aborted!", txs)
+
             return (self.identifier, "aborted")
 
         return (self.identifier, "Not involved in this transaction")
