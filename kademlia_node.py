@@ -109,8 +109,8 @@ class KademliaNode(DatagramRPCProtocol):
             ledger_bootstrap = yield from self.get_ledger(known_node, self.identifier)  # get the bootstrapper's ledger
 
             self.ledger.record = ledger_bootstrap.record  # replace my ledger with that of bootstrappers
-
-            yield from self.broadcast(random_id(), 'add_tx_to_ledger', self.identifier, my_genesis_tx)  # broadcast my genesis transaction to everyone
+            concurr_broadcast = asyncio.coroutine(self.broadcast)
+            yield from concurr_broadcast(random_id(), 'add_tx_to_ledger', self.identifier, my_genesis_tx)  # broadcast my genesis transaction to everyone
 
     # TODO: Refactor the hashed part
     @asyncio.coroutine

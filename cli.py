@@ -119,7 +119,8 @@ async def cli(node):
             if (len(args) < 1):
                 print("Expected atleast 1 argument, %d given" % len(args))
             else:
-                await node.broadcast(random_id(), args[0], node.identifier, *args[1:])
+                concurr_broadcast = asyncio.coroutine(node.broadcast)
+                await concurr_broadcast(random_id(), args[0], node.identifier, *args[1:])
 
         elif cmd in ['ld', 'ledger']:
             "Pretty print the ledger."

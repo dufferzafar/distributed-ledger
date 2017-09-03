@@ -104,7 +104,8 @@ def handle_trans(node):
                     if (witness_commit == "committed" and receiver_commit == "committed"):
                         logger.info("Phase 2 complete")
                         yield from node.commit_tx(node.socket_addr, node.identifier, txs, digital_signature, senders_pub_key)  # Commit transaction
-                        yield from node.broadcast(random_id(), 'commit_tx', node.identifier, txs, digital_signature, senders_pub_key)
+                        concurr_broadcast = asyncio.coroutine(node.broadcast)
+                        yield from concurr_broadcast(random_id(), 'commit_tx', node.identifier, txs, digital_signature, senders_pub_key)
                         node.isbusy = (False, None)
 
                     else:
