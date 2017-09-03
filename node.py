@@ -210,6 +210,9 @@ class Node(DatagramRPCProtocol):
                 logger.info("Trnsaction successfully verified")
                 logger.info("Adding Transaction to ledger")
 
+                for tx in txs[0].input_tx:
+                    self.ledger.record[self.ledger.record.index(tx)].spent = True
+
                 for tx in txs:
                     logger.info("Adding Transaction %d to the ledger", tx.tx_id)
                     self.ledger.add_tx(tx)
