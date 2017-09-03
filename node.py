@@ -31,6 +31,19 @@ class Node(DatagramRPCProtocol, KademliaNode):
         # My list of transactions
         self.ledger = Ledger(self.identifier)
 
+        # These are used by DatagramRPCProtocol
+        self.reply_functions = self.find_reply_functions()
+
+    def find_reply_functions(self):
+        funcs = []
+        funcs.extend(Node.__dict__.values())
+        funcs.extend(KademliaNode.__dict__.values())
+
+        return {
+            func.remote_name: func.reply_function
+            for func in funcs if hasattr(func, 'remote_name')
+        }
+
     def storage_str(self):
         dht = ""
         for k, v in self.storage.items():

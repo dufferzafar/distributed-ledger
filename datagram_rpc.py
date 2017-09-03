@@ -4,7 +4,6 @@ import logging
 import socket
 
 from utils import random_id
-from kademlia_node import KademliaNode
 
 logger = logging.getLogger(__name__)
 
@@ -17,19 +16,7 @@ class DatagramRPCProtocol(asyncio.DatagramProtocol):
 
         self.outstanding_requests = {}
 
-        self.reply_functions = self.find_reply_functions()
-
         super(DatagramRPCProtocol, self).__init__()
-
-    def find_reply_functions(self):
-        funcs = []
-        funcs.extend(self.__class__.__dict__.values())
-        funcs.extend(KademliaNode.__dict__.values())
-
-        return {
-            func.remote_name: func.reply_function
-            for func in funcs if hasattr(func, 'remote_name')
-        }
 
     def connection_made(self, transport):
         logger.info('connection_made: %r', transport)
