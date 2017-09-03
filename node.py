@@ -142,16 +142,13 @@ class Node(DatagramRPCProtocol):
         response = ""
 
         # TODO Generate a transaction based on amount
-
-        gen_status = True  # call gen transaction
-        tx = Transaction(self.identifier, receiver_id, witness_id, amount)  # denotes the generated transaction
-
+        gen_status, txs = self.ledger.gen_trans(self.identifier, receiver_id, witness_id, amount)   # call gen transaction
         if not gen_status:
             response = "Not enough balance"
         elif self.isbusy[0]:
-            response = "Node already busy in another tx %d" % (self.isbusy[1].id)
+            response = "Node already busy in another tx %d" % (self.isbusy[1][0].id)
         else:
-            self.isbusy = (True, tx)
+            self.isbusy = (True, txs)
             response = "Initiating two phase commit Protocol from %d to %d using %d as witness." % (self.identifier, receiver_id, witness_id)
 
         return (self.identifier, response)
