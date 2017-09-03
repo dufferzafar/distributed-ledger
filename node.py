@@ -6,7 +6,7 @@ import pickle
 from functools import wraps
 
 from routing_table import RoutingTable
-from utils import sha1_int, random_id, gen_pub_pvt
+from utils import sha1_int, random_id, gen_pub_pvt, verify_msg
 from datagram_rpc import DatagramRPCProtocol
 
 from transaction import Ledger
@@ -208,50 +208,59 @@ class Node(DatagramRPCProtocol):
 
     @remote
     def commit_tx(self, peer, peer_id, txs, digital_signature, pub_key, *args):
-        tx_type = "new"
 
-        # Transaction already in ledger
-        if(txs[0] in self.ledger.record):
-            tx_type = "old"
+        logger.info("Verifying Digital Signature %r", txs)
+        signature_matches = verify_msg(pub_key, repr(txs), digital_signature)
 
-        # Is someone trying to game the system?
-        if(tx_type == "old" and len(txs) == 2 and txs[1] not in self.ledger.record):
-            tx_type = "weird"
+        if signature_matches:
+            logger.info("Digital Signature verification successfull")
+            tx_type = "new"
 
-        if tx_type == "new":
-            logger.info("Verifying Transaction %r", txs)
+            # Transaction already in ledger
+            if(txs[0] in self.ledger.record):
+                tx_type = "old"
 
-            if self.ledger.verify_trans(txs):
-                logger.info("Transaction successfully verified")
+            # Is someone trying to game the system?
+            if(tx_type == "old" and len(txs) == 2 and txs[1] not in self.ledger.record):
+                tx_type = "weird"
 
-                # Mark each of the inputs as spent
-                for tx in txs[0].input_tx:
-                    self.ledger[self.ledger.index(tx)].spent = True
+            if tx_type == "new":
+                logger.info("Verifying Transaction %r", txs)
 
-                # Add theses transactions to my ledger
-                for tx in txs:
-                    self.ledger.add_tx(tx)
-                    logger.info("Added transaction %d to the ledger", tx.id)
+                if self.ledger.verify_trans(txs):
+                    logger.info("Transaction successfully verified")
 
-                logger.info("Transaction successfully committed %r", txs)
+                    # Mark each of the inputs as spent
+                    for tx in txs[0].input_tx:
+                        self.ledger[self.ledger.index(tx)].spent = True
 
-                # I am now free from handling this transaction
-                if(self.identifier in [txs[0].sender, txs[0].receiver, txs[0].witness]):
-                    self.isbusy = (False, None)
+                    # Add theses transactions to my ledger
+                    for tx in txs:
+                        self.ledger.add_tx(tx)
+                        logger.info("Added transaction %d to the ledger", tx.id)
 
+                    logger.info("Transaction successfully committed %r", txs)
+
+                    # I am now free from handling this transaction
+                    if(self.identifier in [txs[0].sender, txs[0].receiver, txs[0].witness]):
+                        self.isbusy = (False, None)
+
+                    return (self.identifier, "committed")
+                else:
+                    # TODO: Print the reason it failed too?
+                    logger.warn("Transaction verification failed")
+
+                    return (self.identifier, "abort")
+
+            elif tx_type == "old":
+                logger.info("Transaction already in Ledger")
                 return (self.identifier, "committed")
+
             else:
-                # TODO: Print the reason it failed too?
-                logger.warn("Transaction verification failed")
-
+                logger.info("Weird transaction %d", tx[0].id)
                 return (self.identifier, "abort")
-
-        elif tx_type == "old":
-            logger.info("Transaction already in Ledger")
-            return (self.identifier, "committed")
-
         else:
-            logger.info("Weird transaction %d", tx[0].id)
+            logger.info("Digital Signature Verification Failed!")
             return (self.identifier, "abort")
 
     @remote
