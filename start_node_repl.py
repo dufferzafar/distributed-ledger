@@ -82,7 +82,7 @@ async def node_repl(node):
                 except KeyError:
                     print("Key not found")
 
-        elif cmd in ['send_bitcoins']:
+        elif cmd in ['sa', 'send_amount']:
             "Send bitcoins to a node"
 
             if (len(args) != 4):
@@ -97,7 +97,7 @@ async def node_repl(node):
                     witness_id = await node.ping(witness_sock, node.identifier)
                     amount = int(args[3])
 
-                    reply = await node.request(sender_sock, "send_bitcoins", node.identifier, int(receiver_id), int(witness_id), amount)
+                    reply = await node.request(sender_sock, "send_amount", node.identifier, int(receiver_id), int(witness_id), amount)
                     print(reply)
 
                 except Exception as e:

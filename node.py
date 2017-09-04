@@ -1,6 +1,6 @@
 import logging
 
-from kademlia_node import KademliaNode, rpc
+from kademlia_dht import KademliaNode, rpc
 from utils import gen_pub_pvt, verify_msg
 
 from transaction import Ledger
@@ -71,7 +71,7 @@ class Node(KademliaNode):
         super(Node, self).reply_received(peer, message_identifier, response)
 
     @rpc
-    def send_bitcoins(self, peer_sock, peer_id, receiver_id, witness_id, amount):
+    def send_amount(self, peer_sock, peer_id, receiver_id, witness_id, amount):
         # This node is the sender
         # Caller is the node that initiated the call (can be sender itself or cli.py)
 

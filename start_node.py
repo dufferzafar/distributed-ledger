@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import os
-import pickle
 import sys
 import signal
 
