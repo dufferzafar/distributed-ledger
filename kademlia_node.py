@@ -54,7 +54,7 @@ class KademliaNode(DatagramRPCProtocol):
 
     @rpc
     def find_node(self, peer, peer_identifier, key):
-        logger.info('handling find_node(%r, %r, %r)',
+        logger.info('handling find_node(from=%r, peer_id=%r, find=%r)',
                     peer, peer_identifier, key)
 
         response = self.routing_table.find_closest_peers(key, excluding=peer_identifier)
@@ -86,6 +86,7 @@ class KademliaNode(DatagramRPCProtocol):
         """
 
         # When a new node is created, ping some known_node
+        logger.info("Pinging %r", known_node)
         yield from self.ping(known_node, self.identifier)
 
         # Try to find all peers close to myself
@@ -93,6 +94,7 @@ class KademliaNode(DatagramRPCProtocol):
         yield from self.lookup_node(self.identifier)
 
         # Pinging all neighbors will update their routing tables
+        logger.info("Pinging all neighbors")
         yield from self.ping_all_neighbors()
 
         try:
