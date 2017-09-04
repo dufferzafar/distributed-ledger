@@ -45,8 +45,8 @@ def xterm_cmd(ip, port, b_ip=None, b_port=None):
         file = "start_node.py"
         args = "%s %d %s %d" % (ip, port, b_ip, b_port)
     else:
-        title = "Host_%d - Bootstrap CLI: "
-        file = "cli.py"
+        title = "Host_%d - Bootstrap REPL: "
+        file = "start_node_repl.py"
         args = "%s %d" % (ip, port)
 
     title = "%s %s %d" % (title, ip, port)

@@ -64,7 +64,7 @@ def log_ledger(node, interval=5):
 
 
 @asyncio.coroutine
-def handle_trans(node):
+def two_phase_protocol(node):
     logger = logging.getLogger('node')
     while True:
         if(node.isbusy[0]):  # if involved in some transaction
@@ -127,7 +127,7 @@ def handle_trans(node):
         yield from asyncio.sleep(1)
 
 
-def start_a_node(sock_addr, bootstrap_addr=None):
+def start_node(sock_addr, bootstrap_addr=None):
 
     loop = asyncio.get_event_loop()
 
@@ -150,7 +150,7 @@ def start_a_node(sock_addr, bootstrap_addr=None):
     loop.create_task(log_routing_table(node, interval=2))
     loop.create_task(log_dht(node, interval=2))
     loop.create_task(log_ledger(node, interval=5))
-    loop.create_task(handle_trans(node))
+    loop.create_task(two_phase_protocol(node))
     loop.run_forever()
 
 
@@ -159,11 +159,11 @@ if __name__ == '__main__':
     # TODO: Improved argument parsing via docopt or click
 
     if len(sys.argv) == 5:
-        start_a_node(
+        start_node(
             sock_addr=(sys.argv[1], int(sys.argv[2])),
             bootstrap_addr=(sys.argv[3], int(sys.argv[4]))
         )
     else:
-        start_a_node(
+        start_node(
             sock_addr=(sys.argv[1], int(sys.argv[2]))
         )

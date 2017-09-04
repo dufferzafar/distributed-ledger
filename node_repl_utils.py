@@ -22,7 +22,7 @@ def get_sock_from_name(name):
 def generate_help_dict():
     # Get an Abstract Syntax Tree of the cli.py source file
     # I shall rot in seven hells for this sorcery
-    with open('cli.py') as src_file:
+    with open('start_node_repl.py') as src_file:
         tree = ast.parse(src_file.read())
 
     # Our goal is to build a dictionary of commands and their help strings

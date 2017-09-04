@@ -10,14 +10,14 @@ import socket
 from aioconsole import ainput
 
 from node import Node
-from start_node import handle_trans, setup_logging
+from start_node import two_phase_protocol, setup_logging
 
-from utils import random_id, sha1_int
-from cli_utils import get_sock_from_name, generate_help_dict
+from utils import random_id
+from node_repl_utils import get_sock_from_name, generate_help_dict
 
 HELP_DICT = generate_help_dict()
 
-async def cli(node):
+async def node_repl(node):
 
     while True:
 
@@ -130,7 +130,7 @@ async def cli(node):
             print("Please enter valid input.\nType help to see commands")
 
 
-def start_node_with_cli(sock_addr):
+def start_node_with_repl(sock_addr):
 
     loop = asyncio.get_event_loop()
 
@@ -145,13 +145,13 @@ def start_node_with_cli(sock_addr):
     node.socket_addr = node.transport.get_extra_info('sockname')
 
     loop.run_until_complete(node.store(node.socket_addr, node.identifier, node.identifier, (node.socket_addr, node.pub_key)))  # store my pub_key in my dht
-    loop.create_task(handle_trans(node))
-    loop.create_task(cli(node))
+    loop.create_task(two_phase_protocol(node))
+    loop.create_task(node_repl(node))
     loop.run_forever()
 
 
 if __name__ == '__main__':
     # TODO: Improved argument parsing via docopt or click
-    start_node_with_cli(
+    start_node_with_repl(
         sock_addr=(sys.argv[1], int(sys.argv[2]))
     )
