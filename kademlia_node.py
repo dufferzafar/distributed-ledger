@@ -87,7 +87,12 @@ class KademliaNode(DatagramRPCProtocol):
 
         # When a new node is created, ping some known_node
         logger.info("Pinging %r", known_node)
-        yield from self.ping(known_node, self.identifier)
+
+        try:
+            yield from self.ping(known_node, self.identifier)
+        except socket.timeout:
+            logger.warn("Could not ping %r", known_node)
+            return
 
         # Try to find all peers close to myself
         # (this'll update my routing table)
