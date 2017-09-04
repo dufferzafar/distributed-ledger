@@ -129,7 +129,7 @@ class Node(KademliaNode):
     @rpc
     def add_tx_to_ledger(self, peer, peer_id, tx):
         self.ledger.add_tx(tx)
-        logger.info("Added transaction %d to the ledger", tx.id)
+        logger.info("Added transaction %r to the ledger", tx)
         return (self.identifier, True)
 
     @rpc

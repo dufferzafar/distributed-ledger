@@ -14,7 +14,8 @@ class Ledger(object):
         self.node_id = node_id
 
         # Genesis Transaction
-        self.record = [Transaction.genesis(receiver=node_id)]
+        self.genesis_tx = Transaction.genesis(receiver=node_id)
+        self.record = [self.genesis_tx]
 
     def __iter__(self):
         return iter(self.record)
