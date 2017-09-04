@@ -57,9 +57,6 @@ class Node(KademliaNode):
             # self.broadcast_list.append(message_identifier)  # append it to broadcast list
             self.broadcast(message_identifier, procedure_name, *args)  # broadcast it to other peers
             super(Node, self).broadcast_received(peer, message_identifier, procedure_name, *args)  # call super's broadcast received that will call the procedure_name
-        else:
-            # BUG: This should get printed atleast once (but doesn't?)
-            print("Old Message")
 
     def request_received(self, peer, message_identifier, procedure_name, args, kwargs):
         peer_identifier = args[0]
