@@ -106,10 +106,11 @@ class KademliaNode(DatagramRPCProtocol):
             yield from self.put(self.identifier, (self.socket_addr, self.pub_key))
 
             my_genesis_tx = self.ledger.record[0]  # my genesis transaction
+            logger.info("Sendin my genesis transaction")
             yield from self.add_tx_to_ledger(known_node, self.identifier, my_genesis_tx)  # add it to the ledger of bootstrapper
 
             ledger_bootstrap = yield from self.get_ledger(known_node, self.identifier)  # get the bootstrapper's ledger
-
+            logger.info("Got Ledger %r",ledger_bootstrap)
             self.ledger.record = ledger_bootstrap.record  # replace my ledger with that of bootstrappers
             concurr_broadcast = asyncio.coroutine(self.broadcast)
             yield from concurr_broadcast(random_id(), 'add_tx_to_ledger', self.identifier, my_genesis_tx)  # broadcast my genesis transaction to everyone
@@ -209,7 +210,7 @@ class KademliaNode(DatagramRPCProtocol):
             procedure_name : name of the remote procedure to be executed
             args : parameters for that procedure
         """
-        logger.info("received a broadcast for procedure %r as message %r", procedure_name, message_identifier)
+        logger.info("sending a broadcast of procedure %r transaction: %r", procedure_name, args[1])
         if message_identifier not in self.broadcast_list:
             self.broadcast_list.append(message_identifier)
 
