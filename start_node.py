@@ -22,7 +22,8 @@ def setup_logging(node_id, to_file=False):
     kademlia_logger.setLevel(config.LOGLEVEL)
 
     stream_handler = logging.StreamHandler()
-    # stream_handler = logging.FileHandler('logs/%d.log' % node_id, "w")
+    if to_file:
+        stream_handler = logging.FileHandler('logs/%s.log' % node_id, "w")
     stream_handler.setLevel(config.LOGLEVEL)
 
     format_ = logging.Formatter('\n%(asctime)s - %(message)s\n')
