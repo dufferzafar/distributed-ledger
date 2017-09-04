@@ -3,22 +3,42 @@
 
 A dummy bitcoin simulation.
 
-## todo
+# setup
 
-* Sign & Verify transactions
+## enviornment
 
-* Print ledger - group'ed by node id - display sum
+We tested the code on Ubuntu 16.04 machines running mininet version 2.2.1
 
-* Set log level from cli.py
+1. The entire design is centered around asynchronous tasks using the asyncio module, so the code requires Python 3.6. 
 
-* Discuss exactly how we'll demo each task
+To install the required Python 3 packages, run:
 
----
+```
+pip3 install --user aioconsole==0.1.3 ecdsa==0.13
+```
 
-From the [Assignment PDF](http://www.cse.iitd.ernet.in/~mcs162658/cop701/A1.pdf)
+2. mininet is not available with Python 3, so part of the code also requires Python 2.
 
-* Node suddenly chooses to become offline
+To install the required Python 2 packages, run:
 
-* For 2PC 
-    * With some random probability, a node decides to say "abort"
-    * Each transaction is uniquely identified by its scalar Lamport clock:  node id, local transaction number (monotonically increasing sequence)
+```
+pip2 install --user mininet==2.2.1
+```
+
+3. Apart from this, ensure that mininet is properly setup.
+
+## running the code
+
+In a terminal window, run:
+
+```
+sudo python2 start_network.py 10
+```
+
+This will spawn 10 nodes (each with a separate xterm.)
+
+The start_network terminal provides a REPL that can be used to modify the network - add, remove nodes etc.
+
+The first spawned xterm has another REPL that allows us to execute RPCs on a host. This can be used to demo money transfer etc.
+
+Both REPL interfaces have a `help` command that lists all available commands and their usage.
