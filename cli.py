@@ -10,7 +10,7 @@ import socket
 from aioconsole import ainput
 
 from node import Node
-from start_node import handle_trans
+from start_node import handle_trans, setup_logging
 
 from utils import random_id, sha1_int
 from cli_utils import get_sock_from_name, generate_help_dict
@@ -140,7 +140,7 @@ def start_node_with_cli(sock_addr):
 
     f = loop.create_datagram_endpoint(Node, local_addr=sock_addr)
     _, node = loop.run_until_complete(f)
-
+    setup_logging("cli", to_file=True)
     print("MyId :", node.identifier)
 
     node.socket_addr = node.transport.get_extra_info('sockname')
