@@ -11,7 +11,7 @@ from node import Node
 from utils import random_id, sign_msg
 
 
-def setup_logging(node_id):
+def setup_logging(node_id, to_file=False):
 
     # TODO: Color the loglines based on their type
 
