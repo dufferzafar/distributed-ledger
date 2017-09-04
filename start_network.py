@@ -60,7 +60,9 @@ def start_network(nodes=3):
     global NET
 
     NET = Mininet(
-        topo=LinearTopo(k=nodes),
+        # NOTE: This is actually a SingleTopo
+        # Other large topologies hang mininet
+        topo=LinearTopo(k=1, n=nodes),
         ipBase=config.IP
     )
 
@@ -116,7 +118,7 @@ class MininetREPL(REPL):
         end_switch = NET.switches[-1]
 
         new_switch = NET.addSwitch('s%d' % host_num)
-        new_host = NET.addHost("h%d" % host_num)
+        new_host = NET.addHost("h%ds%d" % (host_num, host_num))
 
         # TODO: Fix bug that doesn't allow adding nodes starting from 1
         Link(new_host, new_switch)
