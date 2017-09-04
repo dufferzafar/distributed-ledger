@@ -54,7 +54,7 @@ class Node(KademliaNode):
 
         # TODO: Move this to DatagramRPCProtocol?
         if message_identifier not in self.broadcast_list:  # if message identifier is not in list
-            self.broadcast_list.append(message_identifier)  # append it to broadcast list
+            # self.broadcast_list.append(message_identifier)  # append it to broadcast list
             self.broadcast(message_identifier, procedure_name, *args)  # broadcast it to other peers
             super(Node, self).broadcast_received(peer, message_identifier, procedure_name, *args)  # call super's broadcast received that will call the procedure_name
         else:
